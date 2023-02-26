@@ -1,14 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management.Automation;
-using System.Management.Automation.Language;
+﻿using System.Management.Automation;
 using System.Reflection;
-using System.Reflection.Metadata;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace WriteProgressPlus;
 public partial class ItemFormatter
@@ -24,10 +16,10 @@ public partial class ItemFormatter
         else
         {
             string scs = script.ToString();
-            if (scs.Contains("$_"))
+            string replaced = AliasDetector().Replace(scs, AliasReplacer);
+            if (scs.Length != replaced.Length)
             {
-                scs = scs.Replace("$_", "$args");
-                Script = ScriptBlock.Create(scs);
+                Script = ScriptBlock.Create(replaced);
             }
             else
             {
@@ -38,26 +30,26 @@ public partial class ItemFormatter
         Properties = props;
         PropertiesSeparator = sep ?? " ";
     }
-    public string? FormatItem(object? item)
+    public string? FormatItem(params object[]? objects)
     {
         Components.Clear();
-        if (item is null) return null;
+        if (objects is null) return null;
         if (Script is not null)
         {
-            return Script.InvokeReturnAsIs(item).ToString();
+            return Script.InvokeReturnAsIs(objects).ToString();
         }
         else if (Properties is not null && Properties.Length > 0)
         {
-            if (item is PSObject pso)
+            if (objects[0] is PSObject pso)
                 GetPropertyOfPsObject(pso);
             else
-                GetPropertyOfNormalObject(item);
+                GetPropertyOfNormalObject(objects[0]);
             if (Components.Count == 0) return null;
             return string.Join(PropertiesSeparator, Components);
         }
         else
         {
-            return item.ToString();
+            return objects[0].ToString();
         }
     }
     void GetPropertyOfPsObject(PSObject pso)
@@ -120,9 +112,33 @@ public partial class ItemFormatter
         else
             return ".";
     }
-
+    private static readonly MatchEvaluator AliasReplacer = new(ReplaceAlias);
+#if NET46
+    private readonly static Regex WildcardDetector_46 = new Regex(@"[\*\?]", RegexOptions.Compiled);
+    private readonly static Regex WildcardReplacer_46 = new Regex(@"(\\\*)|(\\\?)", RegexOptions.Compiled);
+    private readonly static Regex AliasDetector_46 = new Regex(@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled);
+    private static Regex WildcardDetector() => WildcardDetector_46;
+    private static Regex WildcardReplacer() => WildcardReplacer_46;
+    private static Regex AliasDetector() => AliasDetector_46;
+#else
     [GeneratedRegex(@"[\*\?]")]
     private static partial Regex WildcardDetector();
     [GeneratedRegex(@"(\\\*)|(\\\?)")]
     private static partial Regex WildcardReplacer();
+
+    [GeneratedRegex(@"\$(?<alias>[_ctpCTP])")]
+    private static partial Regex AliasDetector();
+#endif
+    private static string ReplaceAlias(Match m)
+    {
+        int num = m.Groups["alias"].Value switch
+        {
+            "_" => 0,
+            "c" or "C" => 1,
+            "p" or "P" => 2,
+            "t" or "T" => 3,
+            _ => throw new NotImplementedException(),
+        };
+        return $"$($args[{num}])";
+    }
 }

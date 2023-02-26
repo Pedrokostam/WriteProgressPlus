@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace WriteProgressPlus;
 public sealed class ProgressInner
@@ -48,7 +44,11 @@ public sealed class ProgressInner
     {
         int left = totalCount - CurrentIteration;
         if (left < 0) return Negative;
+#if NET46
+        return TimeSpan.FromSeconds(Keeper.GetAverage().Seconds * left);
+#else
         return Keeper.GetAverage() * left;
+#endif
     }
     public void WriteProgress(Cmdlet parent)
     {
@@ -57,12 +57,10 @@ public sealed class ProgressInner
         if (parent.CommandRuntime == CmdRuntime)
         {
             parent.WriteProgress(AssociatedRecord);
-            parent.WriteDebug("Writing through parent");
         }
         else
         {
             CmdRuntime.WriteProgress(AssociatedRecord);
-            parent.WriteDebug("Writing through CommandRuntime");
         }
     }
     public bool ShouldDisplay() => Keeper.ShouldDisplay();
@@ -87,17 +85,27 @@ public sealed class ProgressInner
             int scale = 10;
             TimeSpan elapsed = DateTime.Now - Keeper.StartTime;
             int modulo = (int)elapsed.TotalSeconds % scale;
+#if NET46
+            int x = 100 - (scale - modulo) * (int)(100.0 / scale);
+            percentage = x >= 100 ? 99 : x < 0 ? 0 : x;
+#else
             percentage = Math.Clamp(100 - (scale - modulo) * (int)(100.0 / scale), 1, 99);
+#endif
         }
         int remainingSeconds = -1;
         if (!donor.NoETA && donor.TotalCount > 0)
         {
             remainingSeconds = (int)GetRemainingTime(donor.TotalCount).TotalSeconds;
         }
-        if (!donor.HideObject && donor.InputObject is not null && donor.Formatter.FormatItem(donor.InputObject) is string s)
+        if (!donor.HideObject && donor.InputObject is not null)
         {
-            StatusBuilder.Append(s).Append(" - ");
+            object[] package = { donor.InputObject, CurrentIteration, percentage, donor.TotalCount };
+            if (donor.Formatter.FormatItem(package) is string s)
+            {
+                StatusBuilder.Append(s).Append(" - ");
+            }
         }
+
         if (!donor.NoCounter)
         {
             StatusBuilder.Append(CurrentIteration.ToString("d3"));

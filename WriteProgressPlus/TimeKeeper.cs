@@ -12,7 +12,13 @@ internal class TimeKeeper
     {
         StartTime = DateTime.Now;
         Buffer = new(calculationLength);
+#if NET46
+        LastDisplayed = StartTime - TimeSpan.FromSeconds(UpdatePeriod.Seconds*5);
+#else
         LastDisplayed = StartTime - 5 * UpdatePeriod;
+#endif
+
+
     }
     public TimeKeeper() : this(CalculationLength)
     {

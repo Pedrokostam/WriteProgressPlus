@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Management.Automation;
-using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommon.Get, "PipelineItemCount")]
@@ -76,7 +70,11 @@ public partial class GetPipelineItemCount : PSCmdlet
         }
     }
 
-
+#if NET46
+    private readonly static Regex AdvancedFormat_46 = new("{\\s*0.*}", RegexOptions.Compiled);
+    private static Regex AdvancedFormat() => AdvancedFormat_46;
+#else
     [GeneratedRegex("{\\s*0.*}")]
     private static partial Regex AdvancedFormat();
+#endif
 }

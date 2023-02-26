@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management.Automation;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Management.Automation;
 
 namespace WriteProgressPlus;
 public class ProgressBase : PSCmdlet
 {
+    protected const int Offset = 2137;
     internal static readonly Dictionary<int, ProgressInner> ProgressDict = new();
     public static ProgressInner GetProgressInner(int id, int parentid, ICommandRuntime cmdr)
     {
@@ -24,14 +20,25 @@ public class ProgressBase : PSCmdlet
     }
     public bool RemoveProgressInner(int id)
     {
+#if NET46
+        if (ProgressDict.TryGetValue(id, out ProgressInner? progressInner))
+        {
+            progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
+            progressInner.AssociatedRecord.PercentComplete = 100;
+            progressInner.WriteProgress(this);
+            WriteDebug($"Removed state for progress bar {id - Offset}");
+            ProgressDict.Remove(id);
+        }
+#else
         if (ProgressDict.Remove(id, out ProgressInner? progressInner))
         {
             progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
             progressInner.AssociatedRecord.PercentComplete = 100;
             progressInner.WriteProgress(this);
-            WriteDebug($"Removed state for progress bar {id}");
+            WriteDebug($"Removed state for progress bar {id-Offset}");
             return true;
         }
+#endif
         return false;
     }
     public void ClearProgressInners()

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management.Automation;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Management.Automation;
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommon.Reset, "ProgressPlus")]
@@ -30,7 +25,7 @@ public sealed class ResetProgressPlus : ProgressBase
         {
             foreach (int i in ID)
             {
-                if (RemoveProgressInner(i))
+                if (RemoveProgressInner(i+Offset))
                     WriteVerbose($"Removed progress bar - {i}");
             }
         }

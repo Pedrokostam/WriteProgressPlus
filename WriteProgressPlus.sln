@@ -11,6 +11,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.P5Tester"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.Benchmark", "WriteProgressPlus.Benchmark\WriteProgressPlus.Benchmark.csproj", "{A935E47A-1134-431D-81E0-73D0C2D87F61}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{50B0FA16-9D3C-405A-906C-98404999B3CB}"
+	ProjectSection(SolutionItems) = preProject
+		docs\Get-PipelineItemCount.md = docs\Get-PipelineItemCount.md
+		docs\Reset-ProgressPlus.md = docs\Reset-ProgressPlus.md
+		docs\Write-ProgressPlus.md = docs\Write-ProgressPlus.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
