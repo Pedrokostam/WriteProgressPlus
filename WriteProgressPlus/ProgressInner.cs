@@ -102,7 +102,11 @@ public sealed class ProgressInner
             object[] package = { donor.InputObject, CurrentIteration, percentage, donor.TotalCount };
             if (donor.Formatter.FormatItem(package) is string s)
             {
-                StatusBuilder.Append(s).Append(" - ");
+                StatusBuilder.Append(s);
+                if(!donor.NoPercentage.IsPresent || !donor.NoCounter.IsPresent)
+                {
+                StatusBuilder.Append(" - ");
+                }
             }
         }
 
