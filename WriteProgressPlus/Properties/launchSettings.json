@@ -3,8 +3,8 @@
     "Profile 1": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files\\PowerShell\\7\\pwsh.exe",
-      "commandLineArgs": "-NoProfile -NoExit -Command \"Import-Module .\\WriteProgressPlus.dll\"",
-      "workingDirectory": "C:\\Users\\Pedro\\source\\repos\\WriteProgressPlus\\WriteProgressPlus\\bin\\Debug\\net7.0\\"
+      "commandLineArgs": "-NoProfile -NoExit -Command \"Import-Module .\\WriteProgressPlus.dll; . ./test.ps1\"",
+      "workingDirectory": "C:\\Users\\Pedro\\source\\repos\\Pedrokostam\\WriteProgressPlus\\WriteProgressPlus\\bin\\Debug\\net7.0"
     }
   }
 }

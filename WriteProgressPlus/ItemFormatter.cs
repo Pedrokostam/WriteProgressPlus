@@ -36,7 +36,7 @@ public partial class ItemFormatter
         if (objects is null) return null;
         if (Script is not null)
         {
-            return Script.InvokeReturnAsIs(objects).ToString();
+            return Script.InvokeReturnAsIs(objects)?.ToString();
         }
         else if (Properties is not null && Properties.Length > 0)
         {
@@ -49,7 +49,7 @@ public partial class ItemFormatter
         }
         else
         {
-            return objects[0].ToString();
+            return objects[0]?.ToString();
         }
     }
     void GetPropertyOfPsObject(PSObject pso)
