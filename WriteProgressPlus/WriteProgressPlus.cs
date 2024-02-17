@@ -2,6 +2,7 @@
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommunications.Write, "ProgressPlus")]
+[Alias("WriPro")]
 [CmdletBinding(PositionalBinding = false)]
 public sealed class WriteProgressPlus : ProgressBase
 {
@@ -42,7 +43,7 @@ public sealed class WriteProgressPlus : ProgressBase
         )]
     public int CurrentIteration { get; set; } = -1;
 
-    [Parameter(ValueFromPipeline = true, 
+    [Parameter(ValueFromPipeline = true,
         HelpMessage = "Current object. If specified, can be used for formatting status."
         )]
     public object? InputObject { get; set; }

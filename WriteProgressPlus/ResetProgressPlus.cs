@@ -25,11 +25,11 @@ public sealed class ResetProgressPlus : ProgressBase
         {
             foreach (int i in ID)
             {
-                if (RemoveProgressInner(i+Offset))
+                if (RemoveProgressInner(i + Offset))
                     WriteVerbose($"Removed progress bar - {i}");
             }
         }
-        else
+        else if (!All.IsPresent)
         {
             ErrorRecord ec = new(
                 new ArgumentException("Neither -All nor any ID were specified."),

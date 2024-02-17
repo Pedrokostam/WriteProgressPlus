@@ -5,10 +5,11 @@
 		<TargetFrameworks>net7.0;net46</TargetFrameworks>
 		<!--<ImplicitUsings>enable</ImplicitUsings>-->
 		<Nullable>enable</Nullable>
+		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="PolySharp" Version="1.12.1">
+		<PackageReference Include="PolySharp" Version="1.14.1">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -19,6 +20,20 @@
 	  <None Update="test.ps1">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
+	  <None Update="WriteProgressPlus.psd1">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	  <None Update="WriteProgressPlus.psm1">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="publish\" />
+	</ItemGroup>
+
+	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	  <Exec Command="powershell -executionpolicy bypass &quot;C:\Users\Pedro\source\repos\Pedrokostam\WriteProgressPlus\WriteProgressPlus\postbuild.ps1&quot; $(TargetDir) $(ProjectName)" />
+	</Target>
 
 </Project>
