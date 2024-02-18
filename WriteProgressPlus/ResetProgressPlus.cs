@@ -1,7 +1,9 @@
 ﻿using System.Management.Automation;
+using WriteProgressPlus.Components;
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommon.Reset, "ProgressPlus")]
+[Alias("ResPro")]
 [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = "NORMAL")]
 public sealed class ResetProgressPlus : ProgressBase
 {

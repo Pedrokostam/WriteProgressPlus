@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-namespace WriteProgressPlus;
+namespace WriteProgressPlus.Components;
 public partial class ItemFormatter
 {
     readonly List<object?> Components = new();
@@ -113,22 +113,9 @@ public partial class ItemFormatter
             return ".";
     }
     private static readonly MatchEvaluator AliasReplacer = new(ReplaceAlias);
-#if NETSTANDARD2_0_OR_GREATER
-    private readonly static Regex WildcardDetector_46 = new Regex(@"[\*\?]", RegexOptions.Compiled);
-    private readonly static Regex WildcardReplacer_46 = new Regex(@"(\\\*)|(\\\?)", RegexOptions.Compiled);
-    private readonly static Regex AliasDetector_46 = new Regex(@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled);
-    private static Regex WildcardDetector() => WildcardDetector_46;
-    private static Regex WildcardReplacer() => WildcardReplacer_46;
-    private static Regex AliasDetector() => AliasDetector_46;
-#else
-    [GeneratedRegex(@"[\*\?]")]
-    private static partial Regex WildcardDetector();
-    [GeneratedRegex(@"(\\\*)|(\\\?)")]
-    private static partial Regex WildcardReplacer();
-
-    [GeneratedRegex(@"\$(?<alias>[_ctpCTP])")]
-    private static partial Regex AliasDetector();
-#endif
+    private static Regex WildcardDetector() => new Regex(@"[\*\?]", RegexOptions.Compiled);
+    private static Regex WildcardReplacer() => new Regex(@"(\\\*)|(\\\?)", RegexOptions.Compiled);
+    private static Regex AliasDetector() => new Regex(@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled);
     private static string ReplaceAlias(Match m)
     {
         int num = m.Groups["alias"].Value switch

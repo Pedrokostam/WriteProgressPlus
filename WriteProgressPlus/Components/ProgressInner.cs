@@ -1,7 +1,7 @@
 ﻿using System.Management.Automation;
 using System.Text;
 
-namespace WriteProgressPlus;
+namespace WriteProgressPlus.Components;
 public sealed class ProgressInner
 {
     /// <summary>
@@ -44,11 +44,7 @@ public sealed class ProgressInner
     {
         int left = totalCount - CurrentIteration;
         if (left < 0) return Negative;
-#if NETSTANDARD2_0_OR_GREATER
-        return TimeSpan.FromSeconds(Keeper.GetAverage().Seconds * left);
-#else
-        return Keeper.GetAverage() * left;
-#endif
+        return Keeper.GetAverage().Multiply(left);
     }
     public void WriteProgress(Cmdlet parent)
     {
@@ -103,9 +99,9 @@ public sealed class ProgressInner
             if (donor.Formatter.FormatItem(package) is string s)
             {
                 StatusBuilder.Append(s);
-                if(!donor.NoPercentage.IsPresent || !donor.NoCounter.IsPresent)
+                if (!donor.NoPercentage.IsPresent || !donor.NoCounter.IsPresent)
                 {
-                StatusBuilder.Append(" - ");
+                    StatusBuilder.Append(" - ");
                 }
             }
         }

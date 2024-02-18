@@ -12,10 +12,10 @@
     #RootModule = 'WriteProgressPlus.psm1'
 
     # Version number of this module.
-    ModuleVersion      = '0.5.0'
+    ModuleVersion      = '0.0.1'
 
     # Supported PSEditions
-    # CompatiblePSEditions = @()
+    CompatiblePSEditions = @('Desktop', 'Core')
 
     # ID used to uniquely identify this module
     GUID               = '19da6c54-8e49-4a5f-b424-4ba6e3500783'
@@ -33,16 +33,16 @@
     Description        = 'Wrapper around WriteProgress, which automates its functionalities and allows simpler control, including support for in-pipeline placement.'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion  = '7.0'
+    PowerShellVersion  = '5.1'
 
     # Name of the PowerShell host required by this module
     PowerShellHostName = 'ConsoleHost'
 
     # Minimum version of the PowerShell host required by this module
-    # PowerShellHostVersion = '7.0'
+    PowerShellHostVersion = '5.1'
 
     # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-    # DotNetFrameworkVersion = ''
+    DotNetFrameworkVersion = '4.6.1'
 
     # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
     # ClrVersion = ''
@@ -69,16 +69,16 @@
     NestedModules      = @('WriteProgressPlus.dll')
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport  = 'Write-ProgressPlus', 'Reset-ProgressPlus'
+    FunctionsToExport  = @()
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport    = @()
+    CmdletsToExport    = @('Write-ProgressPlus', 'Reset-ProgressPlus', 'Get-PipelineItemCount')
 
     # Variables to export from this module
     VariablesToExport  = @()
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport    = @('WriPro', 'ResPro')
+    AliasesToExport    = @('WriPro', 'ResPro', 'Count')
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()
@@ -101,7 +101,7 @@
             # LicenseUri = 'License.txt'
 
             # A URL to the main website for this project.
-            # ProjectUri = 'https://github.com/Pedrokostam/WriteProgressPlus'
+            ProjectUri = 'https://github.com/Pedrokostam/WriteProgressPlus'
 
             # A URL to an icon representing this module.
             # IconUri = ''

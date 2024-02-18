@@ -1,4 +1,5 @@
 ﻿using System.Management.Automation;
+using WriteProgressPlus.Components;
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommunications.Write, "ProgressPlus")]

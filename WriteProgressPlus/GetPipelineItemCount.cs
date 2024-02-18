@@ -1,9 +1,11 @@
 ﻿using System.Globalization;
 using System.Management.Automation;
 using System.Text.RegularExpressions;
+using WriteProgressPlus.Components;
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommon.Get, "PipelineItemCount")]
+[Alias("Count")]
 [CmdletBinding(PositionalBinding = false, DefaultParameterSetName = "Default")]
 [OutputType(typeof(int), ParameterSetName = new[] { "Default" })]
 [OutputType(typeof(string), ParameterSetName = new[] { "Format" })]
@@ -14,34 +16,34 @@ public partial class GetPipelineItemCount : PSCmdlet
     [Parameter(ParameterSetName = "Format")]
     [ValidateNotNullOrEmpty]
     public string? Format { get; set; }
-    [Parameter(ParameterSetName = "Format")]
-    public object? FormatProvider { get; set; }
+    [Parameter(ParameterSetName = "FormatProvider")]
+    [ArgumentFormatProviderTransformation()]
+    public IFormatProvider? FormatProvider { get; set; } = null;
 
+    [Parameter]
+    public SwitchParameter PassThru { get; set; }
 
-    private IFormatProvider? provider;
+    [Parameter]
+    public SwitchParameter ToHost { get; set; }
+
     private int Count = 0;
     private bool isAdvanced = false;
     protected override void BeginProcessing()
     {
-        if (ParameterSetName != "Format") return;
-        provider = FormatProvider switch
-        {
-            string name => new CultureInfo(name),
-            int num => new CultureInfo(num),
-            IFormatProvider formatProvider => formatProvider,
-            _ => CultureInfo.CurrentCulture,
-        };
+        if (ParameterSetName == "Default")
+            return;
         try
         {
-
+            // Try to format count using format and formatprovider
             if (Format != null && AdvancedFormat().IsMatch(Format))
             {
-                _ = string.Format(provider, Format, Count);
+                //if format contains brackets we need to pass an argument
+                _ = string.Format(FormatProvider, Format, Count);
                 isAdvanced = true;
             }
             else
             {
-                _ = Count.ToString(Format, provider);
+                _ = Count.ToString(Format, FormatProvider);
                 isAdvanced = false;
             }
         }
@@ -54,27 +56,33 @@ public partial class GetPipelineItemCount : PSCmdlet
     protected override void ProcessRecord()
     {
         Count++;
+        if (PassThru.IsPresent)
+        {
+            WriteObject(InputItem);
+        }
     }
     protected override void EndProcessing()
     {
         if (ParameterSetName == "Format")
         {
+            string message;
             if (isAdvanced)
-                WriteObject(string.Format(provider, Format!, Count));
+                message = string.Format(FormatProvider, Format!, Count);
             else
-                WriteObject(Count.ToString(Format, provider));
+                message = Count.ToString(Format, FormatProvider);
+            if (ToHost.IsPresent)
+            {
+                WriteInformation(message, new string[] { });
+            }
+            else
+            {
+                WriteObject(Count.ToString(Format, FormatProvider));
+            }
         }
         else
         {
             WriteObject(Count);
         }
     }
-
-#if NETSTANDARD2_0_OR_GREATER
-    private readonly static Regex AdvancedFormat_46 = new("{\\s*0.*}", RegexOptions.Compiled);
-    private static Regex AdvancedFormat() => AdvancedFormat_46;
-#else
-    [GeneratedRegex("{\\s*0.*}")]
-    private static partial Regex AdvancedFormat();
-#endif
+    private static Regex AdvancedFormat() => new("{\\s*0.*}", RegexOptions.Compiled);
 }
