@@ -5,7 +5,7 @@ using System.Management.Automation;
 using System.Text;
 
 namespace WriteProgressPlus.Components;
-internal class ArgumentFormatProviderTransformationAttribute : ArgumentTransformationAttribute
+internal sealed class ArgumentFormatProviderTransformationAttribute : ArgumentTransformationAttribute
 {
     public override object Transform(EngineIntrinsics engineIntrinsics, object inputData)
     {

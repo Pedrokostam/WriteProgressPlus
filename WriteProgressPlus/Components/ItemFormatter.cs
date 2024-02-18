@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace WriteProgressPlus.Components;
 public partial class ItemFormatter
 {
-    readonly List<object?> Components = new();
+    readonly List<object?> Components = [];
     public ScriptBlock? Script { get; set; }
     public string[]? Properties { get; set; }
     public string? PropertiesSeparator { get; set; }
@@ -38,7 +38,8 @@ public partial class ItemFormatter
         {
             return Script.InvokeReturnAsIs(objects)?.ToString();
         }
-        else if (Properties is not null && Properties.Length > 0)
+
+        if (Properties is not null && Properties.Length > 0)
         {
             if (objects[0] is PSObject pso)
                 GetPropertyOfPsObject(pso);
@@ -98,24 +99,25 @@ public partial class ItemFormatter
         string pattern = WildcardReplacer().Replace(Regex.Escape(name), eval);
         foreach (var oprop in allprops)
         {
-            if (Regex.IsMatch(oprop.Name, pattern, RegexOptions.IgnoreCase))
+            if (Regex.IsMatch(oprop.Name, pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(2)))
             {
                 Components.Add(oprop.GetValue(obj));
             }
         }
     }
 
-    private string ReplaceWildcard(Match m)
+    private static string ReplaceWildcard(Match m)
     {
-        if (m.Value == @"\*")
+        if (string.Equals(m.Value, @"\*", StringComparison.Ordinal))
+        {
             return ".*";
-        else
-            return ".";
+        }
+        return ".";
     }
     private static readonly MatchEvaluator AliasReplacer = new(ReplaceAlias);
-    private static Regex WildcardDetector() => new Regex(@"[\*\?]", RegexOptions.Compiled);
-    private static Regex WildcardReplacer() => new Regex(@"(\\\*)|(\\\?)", RegexOptions.Compiled);
-    private static Regex AliasDetector() => new Regex(@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled);
+    private static Regex WildcardDetector() => new(@"[\*\?]", RegexOptions.Compiled, TimeSpan.FromSeconds(2));
+    private static Regex WildcardReplacer() => new (@"(\\\*)|(\\\?)", RegexOptions.Compiled | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(2));
+    private static Regex AliasDetector() => new (@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled, TimeSpan.FromSeconds(2));
     private static string ReplaceAlias(Match m)
     {
         int num = m.Groups["alias"].Value switch
@@ -124,7 +126,7 @@ public partial class ItemFormatter
             "c" or "C" => 1,
             "p" or "P" => 2,
             "t" or "T" => 3,
-            _ => throw new NotImplementedException(),
+            _ => throw new NotSupportedException(),
         };
         return $"$($args[{num}])";
     }

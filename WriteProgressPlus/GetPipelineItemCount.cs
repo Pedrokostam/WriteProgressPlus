@@ -16,7 +16,7 @@ public partial class GetPipelineItemCount : PSCmdlet
     [Parameter(ParameterSetName = "Format")]
     [ValidateNotNullOrEmpty]
     public string? Format { get; set; }
-    [Parameter(ParameterSetName = "FormatProvider")]
+    [Parameter(ParameterSetName = "Format")]
     [ArgumentFormatProviderTransformation()]
     public IFormatProvider? FormatProvider { get; set; } = null;
 
@@ -63,25 +63,25 @@ public partial class GetPipelineItemCount : PSCmdlet
     }
     protected override void EndProcessing()
     {
+        object message;
         if (ParameterSetName == "Format")
         {
-            string message;
             if (isAdvanced)
                 message = string.Format(FormatProvider, Format!, Count);
             else
                 message = Count.ToString(Format, FormatProvider);
-            if (ToHost.IsPresent)
-            {
-                WriteInformation(message, new string[] { });
-            }
-            else
-            {
-                WriteObject(Count.ToString(Format, FormatProvider));
-            }
         }
         else
         {
-            WriteObject(Count);
+            message = Count;
+        }
+        if (ToHost.IsPresent)
+        {
+            WriteInformation(message, new string[] { "PSHOST" });
+        }
+        else
+        {
+            WriteObject(Count.ToString(Format, FormatProvider));
         }
     }
     private static Regex AdvancedFormat() => new("{\\s*0.*}", RegexOptions.Compiled);

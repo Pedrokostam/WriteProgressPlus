@@ -8,7 +8,7 @@
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<OutputType>Library</OutputType>
 		<Authors>Maciej Krosta</Authors>
-		<Version>0.8.3</Version>
+		<Version>0.8.5</Version>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
 		<Description>Wrapper around WriteProgress, which automates its functionalities and allows simpler control.</Description>
@@ -31,6 +31,10 @@
 
 
 	<ItemGroup>
+	  <PackageReference Include="Meziantou.Analyzer" Version="2.0.141">
+	    <PrivateAssets>all</PrivateAssets>
+	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+	  </PackageReference>
 	  <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
 	</ItemGroup>
 

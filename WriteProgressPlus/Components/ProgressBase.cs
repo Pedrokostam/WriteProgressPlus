@@ -4,7 +4,7 @@ namespace WriteProgressPlus.Components;
 public class ProgressBase : PSCmdlet
 {
     protected const int Offset = 2137;
-    internal static readonly Dictionary<int, ProgressInner> ProgressDict = new();
+    internal static readonly Dictionary<int, ProgressInner> ProgressDict = [];
     public static ProgressInner GetProgressInner(int id, int parentid, ICommandRuntime cmdr)
     {
         if (ProgressDict.TryGetValue(id, out ProgressInner? pi))
