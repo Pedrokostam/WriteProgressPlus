@@ -44,7 +44,7 @@ public sealed class ProgressInner
     {
         int left = totalCount - CurrentIteration;
         if (left < 0) return Negative;
-#if NET46
+#if NETSTANDARD2_0_OR_GREATER
         return TimeSpan.FromSeconds(Keeper.GetAverage().Seconds * left);
 #else
         return Keeper.GetAverage() * left;
@@ -85,7 +85,7 @@ public sealed class ProgressInner
             int scale = 10;
             TimeSpan elapsed = DateTime.Now - Keeper.StartTime;
             int modulo = (int)elapsed.TotalSeconds % scale;
-#if NET46
+#if NETSTANDARD2_0_OR_GREATER
             int x = 100 - (scale - modulo) * (int)(100.0 / scale);
             percentage = x >= 100 ? 99 : x < 0 ? 0 : x;
 #else

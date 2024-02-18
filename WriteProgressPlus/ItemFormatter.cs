@@ -113,7 +113,7 @@ public partial class ItemFormatter
             return ".";
     }
     private static readonly MatchEvaluator AliasReplacer = new(ReplaceAlias);
-#if NET46
+#if NETSTANDARD2_0_OR_GREATER
     private readonly static Regex WildcardDetector_46 = new Regex(@"[\*\?]", RegexOptions.Compiled);
     private readonly static Regex WildcardReplacer_46 = new Regex(@"(\\\*)|(\\\?)", RegexOptions.Compiled);
     private readonly static Regex AliasDetector_46 = new Regex(@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled);

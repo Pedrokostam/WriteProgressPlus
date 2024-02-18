@@ -29,7 +29,7 @@ class TimeBuffer
         if (CurrentIndex == 0) return TimeSpan.Zero;
         if (CurrentIndex < MaxLength)
         {
-#if NET46
+#if NETSTANDARD2_0_OR_GREATER
             return TimeSpan.FromMilliseconds(timeSpans.Take(CurrentIndex).Average(x => x.Milliseconds));
 #else
             return TimeSpan.FromMilliseconds(timeSpans[..CurrentIndex].Average(x => x.Milliseconds));

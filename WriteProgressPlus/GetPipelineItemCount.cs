@@ -70,7 +70,7 @@ public partial class GetPipelineItemCount : PSCmdlet
         }
     }
 
-#if NET46
+#if NETSTANDARD2_0_OR_GREATER
     private readonly static Regex AdvancedFormat_46 = new("{\\s*0.*}", RegexOptions.Compiled);
     private static Regex AdvancedFormat() => AdvancedFormat_46;
 #else

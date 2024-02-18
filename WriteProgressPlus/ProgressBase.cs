@@ -20,7 +20,7 @@ public class ProgressBase : PSCmdlet
     }
     public bool RemoveProgressInner(int id)
     {
-#if NET46
+#if NETSTANDARD2_0_OR_GREATER
         if (ProgressDict.TryGetValue(id, out ProgressInner? progressInner))
         {
             progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
