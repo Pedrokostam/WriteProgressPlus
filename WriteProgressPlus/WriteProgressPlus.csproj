@@ -9,7 +9,7 @@
 		<OutputType>Library</OutputType>
 		<Authors>Maciej Krosta</Authors>
 		<Version>0.9.0</Version>
-		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
 		<Description>Wrapper around WriteProgress, which automates its functionalities and allows simpler control.</Description>
 		<Copyright>Maciej Krosta</Copyright>
@@ -225,7 +225,7 @@
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="powershell -executionpolicy bypass &quot;C:\Users\Pedro\source\repos\Pedrokostam\WriteProgressPlus\WriteProgressPlus\postbuild.ps1&quot; $(TargetDir) $(ProjectName)" />
+	  <Exec Command="pwsh -executionpolicy bypass -file &quot;$(ProjectDir)\postbuild.ps1&quot; $(TargetDir) $(ProjectName)  $(Version)" />
 	</Target>
 
 </Project>
