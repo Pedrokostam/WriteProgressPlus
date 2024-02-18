@@ -33,7 +33,8 @@ public class ProgressBase : PSCmdlet
     }
     public void ClearProgressInners()
     {
-        foreach (int id in ProgressDict.Keys)
+        var keys = ProgressDict.Keys.ToArray();
+        foreach (int id in keys)
         {
             RemoveProgressInner(id);
         }
