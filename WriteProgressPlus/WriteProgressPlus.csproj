@@ -8,7 +8,7 @@
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<OutputType>Library</OutputType>
 		<Authors>Maciej Krosta</Authors>
-		<Version>0.8.2</Version>
+		<Version>0.8.3</Version>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
 		<Description>Wrapper around WriteProgress, which automates its functionalities and allows simpler control.</Description>
@@ -25,9 +25,6 @@
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	  <None Update="WriteProgressPlus.psd1">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </None>
-	  <None Update="WriteProgressPlus.psm1">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
