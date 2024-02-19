@@ -88,7 +88,7 @@ PS C:\>100..300 | Write-ProgressPlus -TotalCount 200 -DisplayScript {[math]::sqr
 
 Will display a progress which will update 200 times, displaying number of iterations passed.
 
-The status will contain the square root of current object (10, 10.0498756211, 10.0995049384, …)
+The status will contain the square root of current object (10, 10.0498756211, 10.0995049384, ...)
 
 Percentage of completion will be displayed, as well as estimated time to completion.
 
