@@ -41,7 +41,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     public string[]? DisplayProperties { get; set; }
 
     [Parameter()]
-    [ValidateNotNull]
+    [ValidateNotNullOrEmpty]
     public string DisplayPropertiesSeparator { get; set; } = ", ";
 
     [Parameter()]
