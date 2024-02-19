@@ -10,6 +10,7 @@ public sealed class ResetProgressPlusCommand : ProgressBase
 {
     [Parameter(Position=0,ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName ="NORMAL")]
     public int[]? ID { get; set; }
+
     [Parameter(ParameterSetName="ALL")]
     public SwitchParameter All { get; set; }
 
