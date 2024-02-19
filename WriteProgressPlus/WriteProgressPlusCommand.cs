@@ -7,90 +7,53 @@ namespace WriteProgressPlus;
 [CmdletBinding(PositionalBinding = false)]
 public sealed class WriteProgressPlusCommand : ProgressBase
 {
-    [Parameter(
-        HelpMessage = "Unique ID of progress bar. " +
-        "While IDs is shared with ordinary Write-Progress, " +
-        "this module offset all IDs, sho there should not be any conflict."
-        )]
+    [Parameter()]
     [ValidateRange(0, int.MaxValue)]
     public int ID { get; set; } = 1;
 
-    [Parameter(
-        HelpMessage = "ID of parent progress bar. Used to create sub-bars. To make parent independent, set to a negative value."
-        )]
+    [Parameter()]
     public int ParentID { get; set; } = -1;
 
-    [Parameter(
-        HelpMessage = "Activity description. Will be showed before progress bar."
-        )]
+    [Parameter()]
     [ValidateNotNull]
     public string Activity { get; set; } = "Processing...";
 
-    [Parameter(
-        HelpMessage = "Total count of expected iterations. " +
-        "If positive, will enable showing percent done (and accurate progress length) and time remaining."
-        )]
+    [Parameter()]
     [ValidateRange(1, int.MaxValue)]
     public int TotalCount { get; set; } = -1;
 
-    [Parameter(
-        HelpMessage = "How much to increase the CurrentIteration if it was not specified. " +
-        "If CurrentIteration is specified, Increment is ignored. Set to zero to freeze the progress bar."
-        )]
+    [Parameter()]
     public int Increment { get; set; } = 1;
 
-    [Parameter(
-        HelpMessage = "Overrides the calculated iteration. Works similar to its analogue in WriteProgress"
-        )]
+    [Parameter()]
     public int CurrentIteration { get; set; } = -1;
 
-    [Parameter(ValueFromPipeline = true,
-        HelpMessage = "Current object. If specified, can be used for formatting status."
-        )]
+    [Parameter(ValueFromPipeline = true)]
     public object? InputObject { get; set; }
 
-    [Parameter(
-        HelpMessage = "If true, disables calculation of remaining time."
-        )]
+    [Parameter()]
     public SwitchParameter NoETA { get; set; }
 
-    [Parameter(
-        HelpMessage = "Scriptblock used for formatting status string. " +
-        "The script receives 4 parameters: InputObject, CurrentIteration, PercentDone, TotalCount. " +
-        "Use $Args[0] to $Args[3] to access them. Alternatively, you can use their aliases: $_, $c, $p, $t, respectively. " +
-        "Will override DisplayProperties."
-        )]
+    [Parameter()]
     public ScriptBlock? DisplayScript { get; set; }
 
-    [Parameter(
-        HelpMessage = "List of property names of the input object to format into status. " +
-        "You can use wildcard, for example if the InputObject is a DateTime, specifying *seconds will give both Seconds and Milliseconds. " +
-        "Overriden by DisplayScript."
-        )]
+    [Parameter()]
     public string[]? DisplayProperties { get; set; }
 
-    [Parameter(
-        HelpMessage = "If DisplayProperties are specified, this string will be used to join them."
-        )]
+    [Parameter()]
     [ValidateNotNull]
     public string DisplayPropertiesSeparator { get; set; } = ", ";
 
-    [Parameter(
-        HelpMessage = "If true, hides object (and its formatting) from status"
-        )]
+    [Parameter()]
     public SwitchParameter HideObject { get; set; }
-    [Parameter(
-        HelpMessage = "If true, hides counter from status"
-        )]
+
+    [Parameter()]
     public SwitchParameter NoCounter { get; set; }
-    [Parameter(
-         HelpMessage = "If true, hides percentage from status"
-        )]
+
+    [Parameter()]
     public SwitchParameter NoPercentage { get; set; }
 
-    [Parameter(
-        HelpMessage = "If true and in pipeline, will emit the InputObject further. " +
-        "If this command is in the middle of pipeline, this parameter is forced to true.")]
+    [Parameter()]
     public SwitchParameter PassThru { get; set; } // PassThru is only in pipeline, so no need to store its state
 
 
