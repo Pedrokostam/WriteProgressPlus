@@ -15,8 +15,13 @@ Show a progress bar which can calculate estimated time and percentage.
 ```
 Write-ProgressPlus [-ID <Int32>] [-ParentID <Int32>] [-Activity <String>] [-TotalCount <Int32>]
  [-Increment <Int32>] [-CurrentIteration <Int32>] [-InputObject <Object>] [-NoETA]
- [-DisplayScript <ScriptBlock>] [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>]
- [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru] [-ProgressAction <ActionPreference>]
+ [-DisplayScript <ScriptBlock>] [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru]
+ [<CommonParameters>]
+
+ Write-ProgressPlus [-ID <Int32>] [-ParentID <Int32>] [-Activity <String>] [-TotalCount <Int32>]
+ [-Increment <Int32>] [-CurrentIteration <Int32>] [-InputObject <Object>] [-NoETA]
+ [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>]
+ [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru]
  [<CommonParameters>]
 ```
 
@@ -35,10 +40,84 @@ Works similarly to Write-Progress, but automates many things, including:
 
 ### Example 1
 ```powershell
-PS C:\> {{ Add example code here }}
+PS C:\>1..100 | Write-ProgressPlus | %{Start-Sleep -seconds 1}
+
 ```
 
-{{ Add example description here }}
+Will display a progress which will update 100 times, displaying number of iterations passed.
+
+### Example 2
+```powershell
+PS C:\>1..100 | Write-ProgressPlus -TotalCount 100 | %{Start-Sleep -seconds 1}
+
+```
+
+Will display a progress which will update 100 times, displaying number of iterations passed.
+
+Percentage of completion will be displayed, as well as estimated time to completion.
+
+### Example 3
+```powershell
+PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties Hour, Minute, Second -DisplayPropertiesSeparator ":" | %{Start-Sleep -seconds 1}
+
+```
+
+Will display a progress which will update 100 times, displaying number of iterations passed.
+
+The status will contain current time in format HH:MM:SS.
+
+Percentage of completion will be displayed, as well as estimated time to completion.
+
+### Example 4
+```powershell
+PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties *second | %{Start-Sleep -seconds 1}
+
+```
+
+Will display a progress which will update 100 times, displaying number of iterations passed.
+
+The status will contain Millisecond, Microsecond, Nanosecond, Second - separated by ", "
+
+Percentage of completion will be displayed, as well as estimated time to completion.
+
+### Example 5
+```powershell
+PS C:\>100..300 | Write-ProgressPlus -TotalCount 200 -DisplayScript {[math]::sqrt($_)} | %{Start-Sleep -seconds 1}
+
+```
+
+Will display a progress which will update 200 times, displaying number of iterations passed.
+
+The status will contain the square root of current object (10, 10.0498756211, 10.0995049384, …)
+
+Percentage of completion will be displayed, as well as estimated time to completion.
+
+### Example 6
+```powershell
+PS D:\>Get-ChildItem -Directory | Write-ProgressPlus -ID 1 -DisplayProperties Name | %{$_ | Get-ChildItem -File | Write-ProgressPlus -ParentID 1 -ID 2 -DisplayProperties Name | %{Start-Sleep -Milliseconds 250; $_}}
+
+```
+
+Will display 2 nested progress bars.
+
+The main one will updated for each folder showing folder name in its status.
+
+The nested one will updated for every file in currently processed folder.
+
+### Example 6
+```powershell
+PS D:\>foreach($i in 1..100){
+	Start-Sleep -Milliseconds 500
+	Write-ProgressPlus -ID 1 -InputObject $i -TotalCount 100
+}
+Reset-ProgressPlus -ID 1
+
+
+```
+
+Same progress bar as in Example 2, but not in pipeline.
+
+If Reset-ProgressPlus is not called, subsequent calls to this bar ID will continue from 100.
 
 ## PARAMETERS
 
@@ -54,7 +133,7 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: "Processing..."
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -79,7 +158,7 @@ Accept wildcard characters: False
 ### -DisplayProperties
 List of property names of the input object to format into status.
 
-You can use wildcard, for example if the InputObject is a DateTime, specifying *seconds will give both Seconds and Milliseconds.
+You can use wildcard, for example if the InputObject is a DateTime, specifying *second will give both Seconds and Milliseconds.
 
 Overriden by DisplayScript.
 
@@ -211,7 +290,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoETA
-if specified, hides ETA from status.
+If specified, hides ETA from status.
 
 ```yaml
 Type: SwitchParameter
@@ -278,6 +357,8 @@ Accept wildcard characters: False
 Total count of expected iterations.
 
 If positive, will enable showing percent done (and accurate progress length) and time remaining.
+
+If at any time iteration exceeds TotalCount, command will continue wokring, but a warning will be displayed in status.
 
 ```yaml
 Type: Int32
