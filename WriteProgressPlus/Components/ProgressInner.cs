@@ -12,10 +12,11 @@ public sealed class ProgressInner
     public ProgressInner(int id, int parentId, ICommandRuntime cmdr)
     {
         Id = id;
-        ParentId = parentId < 0 ? -1 : parentId;
+        ParentId = parentId < ProgressBase.Offset ? -1 : parentId;
         Keeper = new TimeKeeper();
         AssociatedRecord = new(id, Placeholder, Placeholder);
-        CmdRuntime = cmdr;
+        ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBase.ProgressDict[ParentId].CmdRuntime : null;
+        CmdRuntime = parentRuntime ?? cmdr;
     }
     /// <summary>
     /// I found no other way to make sure that progress bar are reused, other than using the same CommandRuntime that was used to create it.

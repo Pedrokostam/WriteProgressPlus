@@ -65,6 +65,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     protected override void BeginProcessing()
     {
         ID += Offset;
+        ParentID += Offset;
         int pipePosition = MyInvocation.PipelinePosition;
         int pipeLength = MyInvocation.PipelineLength;
         MiddleOfPipe = pipeLength > pipePosition;
