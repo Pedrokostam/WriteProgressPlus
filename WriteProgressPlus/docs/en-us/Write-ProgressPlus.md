@@ -8,28 +8,28 @@ schema: 2.0.0
 # Write-ProgressPlus
 
 ## SYNOPSIS
-{{ Fill in the Synopsis }}
+Show a progress bar which can calculate estimated time and percentage.
 
 ## SYNTAX
 
-### PIPE
-```
-Write-ProgressPlus [-ID <Int32>] [-ParentID <Int32>] [-Activity <String>] [-TotalCount <Int32>]
- [-Increment <Int32>] [-CurrentIteration <Int32>] -InputObject <Object> [-NoETA] [-DisplayScript <ScriptBlock>]
- [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>] [-HideObject] [-NoCounter]
- [-NoPercentage] [-PassThru] [<CommonParameters>]
-```
-
-### ITERATIVE
 ```
 Write-ProgressPlus [-ID <Int32>] [-ParentID <Int32>] [-Activity <String>] [-TotalCount <Int32>]
  [-Increment <Int32>] [-CurrentIteration <Int32>] [-InputObject <Object>] [-NoETA]
  [-DisplayScript <ScriptBlock>] [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>]
- [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru] [<CommonParameters>]
+ [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru] [-ProgressAction <ActionPreference>]
+ [<CommonParameters>]
 ```
 
 ## DESCRIPTION
-{{ Fill in the Description }}
+Show a progress bar which can calculate estimated time and percentage.
+
+Works similarly to Write-Progress, but automates many things, including:
+
+- iteration count can incremented automatically;
+- percent complete can be calculated automatically, if given -TotalCount;
+- estimated time to completion can be calculated automatically, if given -TotalCount;
+- can be used as a step in pipeline, passing through all input objects;
+- automatic create of bar status, which allows custom formatting and removing parts of it.
 
 ## EXAMPLES
 
@@ -43,7 +43,9 @@ PS C:\> {{ Add example code here }}
 ## PARAMETERS
 
 ### -Activity
-{{ Fill Activity Description }}
+Activity description. Will be showed before progress bar.
+
+Equivalent of Activity of Write-Progress
 
 ```yaml
 Type: String
@@ -58,7 +60,9 @@ Accept wildcard characters: False
 ```
 
 ### -CurrentIteration
-{{ Fill CurrentIteration Description }}
+Overrides the calculated iteration.
+
+Works similar to its analogue in WriteProgress
 
 ```yaml
 Type: Int32
@@ -73,7 +77,11 @@ Accept wildcard characters: False
 ```
 
 ### -DisplayProperties
-{{ Fill DisplayProperties Description }}
+List of property names of the input object to format into status.
+
+You can use wildcard, for example if the InputObject is a DateTime, specifying *seconds will give both Seconds and Milliseconds.
+
+Overriden by DisplayScript.
 
 ```yaml
 Type: String[]
@@ -88,7 +96,7 @@ Accept wildcard characters: False
 ```
 
 ### -DisplayPropertiesSeparator
-{{ Fill DisplayPropertiesSeparator Description }}
+If DisplayProperties are specified, this string will be used to join them.
 
 ```yaml
 Type: String
@@ -97,13 +105,18 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: ", "
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -DisplayScript
-{{ Fill DisplayScript Description }}
+Scriptblock used for formatting status string.
+
+The script receives 4 parameters: InputObject, CurrentIteration, PercentDone, TotalCount.
+Use $Args[0] to $Args[3] to access them. Alternatively, you can use their aliases: $_, $c, $p, $t, respectively.
+
+Will override DisplayProperties.
 
 ```yaml
 Type: ScriptBlock
@@ -118,7 +131,7 @@ Accept wildcard characters: False
 ```
 
 ### -HideObject
-{{ Fill HideObject Description }}
+If specified, hides object (and its formatting) from status
 
 ```yaml
 Type: SwitchParameter
@@ -133,7 +146,10 @@ Accept wildcard characters: False
 ```
 
 ### -ID
-{{ Fill ID Description }}
+Unique ID of progress bar. Used for nesting progress bars.
+
+While IDs is shared with ordinary Write-Progress, 
+this module offsets all IDs, so there should not be any conflict.
 
 ```yaml
 Type: Int32
@@ -148,7 +164,9 @@ Accept wildcard characters: False
 ```
 
 ### -Increment
-{{ Fill Increment Description }}
+How much to increase the CurrentIteration if it was not specified.
+
+If CurrentIteration is specified, Increment is ignored. Set to zero to freeze the progress bar.
 
 ```yaml
 Type: Int32
@@ -157,40 +175,28 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: 1
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -InputObject
-{{ Fill InputObject Description }}
+Current object. If specified, can be used for formatting status.
 
 ```yaml
 Type: Object
-Parameter Sets: PIPE
-Aliases:
-
-Required: True
-Position: Named
-Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
-Accept wildcard characters: False
-```
-
-```yaml
-Type: Object
-Parameter Sets: ITERATIVE
+Parameter Sets: (All)
 Aliases:
 
 Required: False
 Position: Named
 Default value: None
-Accept pipeline input: True (ByPropertyName, ByValue)
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
 ### -NoCounter
-{{ Fill NoCounter Description }}
+If specified, hides counter from status.
 
 ```yaml
 Type: SwitchParameter
@@ -205,7 +211,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoETA
-{{ Fill NoETA Description }}
+if specified, hides ETA from status.
 
 ```yaml
 Type: SwitchParameter
@@ -220,7 +226,7 @@ Accept wildcard characters: False
 ```
 
 ### -NoPercentage
-{{ Fill NoPercentage Description }}
+If specified, hides percentage from status.
 
 ```yaml
 Type: SwitchParameter
@@ -229,13 +235,15 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: false
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -ParentID
-{{ Fill ParentID Description }}
+ID of parent progress bar. Used to create sub-bars.
+
+To make parent independent, set to a negative value.
 
 ```yaml
 Type: Int32
@@ -244,13 +252,15 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: -1
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -PassThru
-{{ Fill PassThru Description }}
+if specified, will emit the input object.
+
+If this command is in the middle of a pipeline, this parameter if set to true and cannot be changed
 
 ```yaml
 Type: SwitchParameter
@@ -259,13 +269,15 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: true for pipeline mode, false otherwise
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
 ### -TotalCount
-{{ Fill TotalCount Description }}
+Total count of expected iterations.
+
+If positive, will enable showing percent done (and accurate progress length) and time remaining.
 
 ```yaml
 Type: Int32
@@ -274,7 +286,7 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: -1
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
@@ -285,10 +297,11 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## INPUTS
 
 ### System.Object
-
+	Any object can be inputted.
 ## OUTPUTS
 
 ### System.Object
+	If -PassThru is true, the input object is outputted, otherwise nothing is.
 ## NOTES
 
 ## RELATED LINKS
