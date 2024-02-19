@@ -13,7 +13,8 @@ Reset progress bar status for the specified id, or for all of them.
 ## SYNTAX
 
 ```
-Reset-ProgressPlus [-ID <Int32[]>] [-All] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Reset-ProgressPlus [-ID <Int32[]>] [<CommonParameters>]
+Reset-ProgressPlus [-All] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
