@@ -5,7 +5,7 @@ namespace WriteProgressPlus;
 [Cmdlet(VerbsCommunications.Write, "ProgressPlus")]
 [Alias("WriPro")]
 [CmdletBinding(PositionalBinding = false)]
-public sealed class WriteProgressPlus : ProgressBase
+public sealed class WriteProgressPlusCommand : ProgressBase
 {
     [Parameter(
         HelpMessage = "Unique ID of progress bar. " +

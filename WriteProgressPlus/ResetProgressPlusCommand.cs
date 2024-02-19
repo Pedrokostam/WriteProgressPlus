@@ -3,13 +3,14 @@ using WriteProgressPlus.Components;
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommon.Reset, "ProgressPlus")]
+[OutputType(typeof(void))]
 [Alias("ResPro")]
-[CmdletBinding(PositionalBinding = false, DefaultParameterSetName = "NORMAL")]
-public sealed class ResetProgressPlus : ProgressBase
+[CmdletBinding(PositionalBinding = true, DefaultParameterSetName = "NORMAL")]
+public sealed class ResetProgressPlusCommand : ProgressBase
 {
-    [Parameter(ValueFromPipeline = true, ValueFromPipelineByPropertyName = true)]
+    [Parameter(Position=0,ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName ="NORMAL")]
     public int[]? ID { get; set; }
-    [Parameter]
+    [Parameter(ParameterSetName="ALL")]
     public SwitchParameter All { get; set; }
 
     protected override void BeginProcessing()

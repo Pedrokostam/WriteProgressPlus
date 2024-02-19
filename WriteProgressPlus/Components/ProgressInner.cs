@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 using System.Text;
 
 namespace WriteProgressPlus.Components;
@@ -62,7 +61,7 @@ public sealed class ProgressInner
     }
     public bool ShouldDisplay() => Keeper.ShouldDisplay();
 
-    internal void UpdateRecord(WriteProgressPlus donor)
+    internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
         NewIteration(donor.Increment, donor.CurrentIteration);
         StatusBuilder.Clear();
@@ -82,12 +81,21 @@ public sealed class ProgressInner
             int scale = 10;
             TimeSpan elapsed = DateTime.Now - Keeper.StartTime;
             int modulo = (int)elapsed.TotalSeconds % scale;
+#if NETSTANDARD2_0_OR_GREATER
             int x = 100 - (scale - modulo) * (int)(100.0 / scale);
             percentage = x >= 100 ? 99 : x < 0 ? 0 : x;
+#else
+            percentage = Math.Clamp(100 - (scale - modulo) * (int)(100.0 / scale), 1, 99);
+#endif
+        }
+        int remainingSeconds = -1;
+        if (!donor.NoETA && donor.TotalCount > 0)
+        {
+            remainingSeconds = (int)GetRemainingTime(donor.TotalCount).TotalSeconds;
         }
         if (!donor.HideObject && donor.InputObject is not null)
         {
-            object[] package = [donor.InputObject, CurrentIteration, percentage, donor.TotalCount];
+            object[] package = { donor.InputObject, CurrentIteration, percentage, donor.TotalCount };
             if (donor.Formatter.FormatItem(package) is string s)
             {
                 StatusBuilder.Append(s);
@@ -100,7 +108,7 @@ public sealed class ProgressInner
 
         if (!donor.NoCounter)
         {
-            StatusBuilder.Append(CurrentIteration.ToString("d3", CultureInfo.CurrentCulture));
+            StatusBuilder.Append(CurrentIteration.ToString("d3"));
             if (donor.TotalCount > 0)
             {
                 StatusBuilder.Append('/').Append(donor.TotalCount).Append(' ');
@@ -116,18 +124,8 @@ public sealed class ProgressInner
                 StatusBuilder.Append("[Incorrect total count]");
             else
             {
-                StatusBuilder.Append(percentage.ToString("d2", CultureInfo.CurrentCulture)).Append('%');
+                StatusBuilder.Append(percentage.ToString("d2")).Append('%');
             }
-        }
-        UpdateAssociatedRecord(donor, percentage);
-    }
-
-    private void UpdateAssociatedRecord(WriteProgressPlus donor, int percentage)
-    {
-        int remainingSeconds = -1;
-        if (!donor.NoETA && donor.TotalCount > 0)
-        {
-            remainingSeconds = (int)GetRemainingTime(donor.TotalCount).TotalSeconds;
         }
         AssociatedRecord.StatusDescription = StatusBuilder.ToString();
         AssociatedRecord.RecordType = ProgressRecordType.Processing;
