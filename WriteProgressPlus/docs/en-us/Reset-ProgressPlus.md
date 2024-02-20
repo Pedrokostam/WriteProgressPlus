@@ -12,9 +12,14 @@ Reset progress bar status for the specified id, or for all of them.
 
 ## SYNTAX
 
+### NORMAL
 ```
-Reset-ProgressPlus [-ID <Int32[]>] [<CommonParameters>]
-Reset-ProgressPlus [-All] [<CommonParameters>]
+Reset-ProgressPlus [-ID <Int32[]>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+```
+
+### ALL
+```
+Reset-ProgressPlus [-All] [-ProgressAction <ActionPreference>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -47,7 +52,7 @@ If specified, the command will remove status for all progress bars started by Wr
 
 ```yaml
 Type: SwitchParameter
-Parameter Sets: (All)
+Parameter Sets: ALL
 Aliases:
 
 Required: False
@@ -62,7 +67,7 @@ IDs of the progress status to be removed.
 
 ```yaml
 Type: Int32[]
-Parameter Sets: (All)
+Parameter Sets: NORMAL
 Aliases:
 
 Required: False
@@ -72,6 +77,20 @@ Accept pipeline input: True (ByPropertyName, ByValue)
 Accept wildcard characters: False
 ```
 
+### -ProgressAction
+{{ Fill ProgressAction Description }}
+
+```yaml
+Type: ActionPreference
+Parameter Sets: (All)
+Aliases: proga
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
 
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
@@ -80,6 +99,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### Int32[]
 IDs of progress bars to be reset.
+
 ## OUTPUTS
 
 ### None
