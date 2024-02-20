@@ -58,10 +58,15 @@ public sealed class WriteProgressPlusCommand : ProgressBase
 
 
     internal readonly ItemFormatter Formatter = new();
+
     private bool MiddleOfPipe { get; set; }
+
     private bool PipelineMode { get; set; }
+
     private bool EmitItem { get; set; }
+
     private ProgressInner? BarWorker { get; set; }
+
     protected override void BeginProcessing()
     {
         ID += Offset;
@@ -98,6 +103,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
             WriteObject(InputObject);
         }
     }
+
     protected override void EndProcessing()
     {
         if (PipelineMode)
@@ -105,11 +111,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
             RemoveProgressInner(ID);
         }
     }
-    protected override void StopProcessing() => EndProcessing();
-    //  ACTIV[STATUS]
-    //      SUBACTIV[SUBSTATUS]
 
-    //  ACTIV STATUS[oo]         
-    //    SUBACTIV SUBSTATUS[oooooooooooooooooooooooooooooooooooooooooooo]
+    protected override void StopProcessing() => EndProcessing();
 
 }
