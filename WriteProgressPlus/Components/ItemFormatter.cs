@@ -6,8 +6,11 @@ namespace WriteProgressPlus.Components;
 public partial class ItemFormatter
 {
     readonly List<object?> Components = [];
+
     public ScriptBlock? Script { get; set; }
+
     public string[]? Properties { get; set; }
+
     public string? PropertiesSeparator { get; set; }
 
     public void Update(ScriptBlock? script, string[]? props, string? sep)
@@ -30,6 +33,7 @@ public partial class ItemFormatter
         Properties = props;
         PropertiesSeparator = sep ?? " ";
     }
+
     public string? FormatItem(params object[]? objects)
     {
         Components.Clear();
@@ -115,9 +119,13 @@ public partial class ItemFormatter
         return ".";
     }
     private static readonly MatchEvaluator AliasReplacer = new(ReplaceAlias);
+
     private static Regex WildcardDetector() => new(@"[\*\?]", RegexOptions.Compiled, TimeSpan.FromSeconds(2));
+
     private static Regex WildcardReplacer() => new (@"(\\\*)|(\\\?)", RegexOptions.Compiled | RegexOptions.ExplicitCapture, TimeSpan.FromSeconds(2));
+
     private static Regex AliasDetector() => new (@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled, TimeSpan.FromSeconds(2));
+
     private static string ReplaceAlias(Match m)
     {
         int num = m.Groups["alias"].Value switch

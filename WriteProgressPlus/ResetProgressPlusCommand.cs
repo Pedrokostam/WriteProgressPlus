@@ -23,6 +23,7 @@ public sealed class ResetProgressPlusCommand : ProgressBase
             WriteVerbose(Invariant($"Removed all progress bars - {count}"));
         }
     }
+
     protected override void ProcessRecord()
     {
         if (ID != null)

@@ -4,11 +4,10 @@ using static System.Globalization.CultureInfo;
 namespace WriteProgressPlus.Components;
 public sealed class ProgressInner
 {
-    /// <summary>
-    /// In milliseconds
-    /// </summary>
     private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
+
     private readonly string Placeholder = "placeholder";
+
     public ProgressInner(int id, int parentId, ICommandRuntime cmdr)
     {
         Id = id;
@@ -18,17 +17,22 @@ public sealed class ProgressInner
         ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBase.ProgressDict[ParentId].CmdRuntime : null;
         CmdRuntime = parentRuntime ?? cmdr;
     }
+
     /// <summary>
     /// I found no other way to make sure that progress bar are reused, other than using the same CommandRuntime that was used to create it.
-    /// 
     /// </summary>
     ICommandRuntime CmdRuntime { get; }
+
     public int Id { get; }
+
     public int ParentId { get; }
+
     internal TimeKeeper Keeper { get; }
+
     internal ProgressRecord AssociatedRecord { get; }
 
     public int CurrentIteration { get; private set; }
+
     public void NewIteration(int increment, int currentIter)
     {
         if (currentIter > 0)
@@ -37,16 +41,19 @@ public sealed class ProgressInner
             CurrentIteration += increment;
         Keeper.AddTime();
     }
+
     /// <summary>
     /// Single stringbuiled to avoid making more objects.
     /// </summary>
     private StringBuilder StatusBuilder { get; } = new StringBuilder();
+
     public TimeSpan GetRemainingTime(int totalCount)
     {
         int left = totalCount - CurrentIteration;
         if (left < 0) return Negative;
         return Keeper.GetAverage().Multiply(left);
     }
+
     public void WriteProgress(Cmdlet parent)
     {
         if (!ShouldDisplay()) return;
@@ -60,6 +67,7 @@ public sealed class ProgressInner
             CmdRuntime.WriteProgress(AssociatedRecord);
         }
     }
+
     public bool ShouldDisplay() => Keeper.ShouldDisplay();
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)

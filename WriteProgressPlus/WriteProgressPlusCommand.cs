@@ -56,7 +56,6 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     [Parameter()]
     public SwitchParameter PassThru { get; set; } // PassThru is only in pipeline, so no need to store its state
 
-
     internal readonly ItemFormatter Formatter = new();
 
     private bool MiddleOfPipe { get; set; }
@@ -113,5 +112,4 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     }
 
     protected override void StopProcessing() => EndProcessing();
-
 }

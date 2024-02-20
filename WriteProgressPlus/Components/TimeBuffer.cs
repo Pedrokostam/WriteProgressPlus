@@ -2,14 +2,18 @@
 
 class TimeBuffer
 {
-    //private readonly LinkedList<TimeSpan> timeSpans;
     private readonly TimeSpan[] timeSpans;
 
     private DateTime LastDataPoint = DateTime.MinValue;
+
     public int CurrentLength { get; private set; }
+
     public int MaxLength { get; }
+
     private int CurrentIndex = 0;
+
     private int InsertionIndex => CurrentIndex % MaxLength;
+
     public TimeBuffer(int calculationLength)
     {
         MaxLength = calculationLength > 0 ? calculationLength : 1;
@@ -17,6 +21,7 @@ class TimeBuffer
     }
 
     public void AddTime() => AddTime(DateTime.Now);
+
     public void AddTime(DateTime time)
     {
         timeSpans[InsertionIndex] = time - LastDataPoint;
