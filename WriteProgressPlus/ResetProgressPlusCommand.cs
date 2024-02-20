@@ -1,6 +1,6 @@
 ﻿using System.Management.Automation;
 using WriteProgressPlus.Components;
-
+using static System.FormattableString;
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommon.Reset, "ProgressPlus")]
 [OutputType(typeof(void))]
@@ -20,7 +20,7 @@ public sealed class ResetProgressPlusCommand : ProgressBase
         {
             int count = ProgressDict.Count;
             ClearProgressInners();
-            WriteVerbose($"Removed all progress bars - {count}");
+            WriteVerbose(Invariant($"Removed all progress bars - {count}"));
         }
     }
     protected override void ProcessRecord()
@@ -30,13 +30,13 @@ public sealed class ResetProgressPlusCommand : ProgressBase
             foreach (int i in ID)
             {
                 if (RemoveProgressInner(i + Offset))
-                    WriteVerbose($"Removed progress bar - {i}");
+                    WriteVerbose(Invariant($"Removed progress bar - {i}"));
             }
         }
         else if (!All.IsPresent)
         {
             ErrorRecord ec = new(
-                new ArgumentException("Neither -All nor any ID were specified."),
+                new InvalidOperationException("Neither -All nor any ID were specified."),
                 "Parameter error",
                 ErrorCategory.InvalidArgument,
                 this);
