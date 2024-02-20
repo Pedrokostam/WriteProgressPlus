@@ -1,4 +1,5 @@
-﻿using System.Management.Automation;
+﻿using System.Drawing;
+using System.Management.Automation;
 using System.Text;
 using static System.Globalization.CultureInfo;
 namespace WriteProgressPlus.Components;
@@ -14,12 +15,16 @@ public sealed class ProgressInner
         ParentId = parentId < ProgressBase.Offset ? -1 : parentId;
         Keeper = new TimeKeeper();
         AssociatedRecord = new(id, Placeholder, Placeholder);
+        // try to reuse parentRuntime
         ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBase.ProgressDict[ParentId].CmdRuntime : null;
         CmdRuntime = parentRuntime ?? cmdr;
     }
 
     /// <summary>
-    /// I found no other way to make sure that progress bar are reused, other than using the same CommandRuntime that was used to create it.
+    /// What actually calls WriteProgress.
+    /// 
+    /// I found no other way to make sure that progress bar are reused,
+    /// other than using the same CommandRuntime that was used to create it.
     /// </summary>
     ICommandRuntime CmdRuntime { get; }
 
@@ -31,27 +36,160 @@ public sealed class ProgressInner
 
     internal ProgressRecord AssociatedRecord { get; }
 
-    public int CurrentIteration { get; private set; }
+    /// <summary>
+    /// Actual iteration number, incremented automatically or specified by user.
+    /// </summary>
+    public int ActualCurrentIteration { get; private set; }
 
-    public void NewIteration(int increment, int currentIter)
+    /// <summary>
+    /// Calculate <see cref="ActualCurrentIteration"/> using information from donor.
+    /// If donor's CurrentIteration is negative, use its Increment to calculate it.
+    /// If it's positive, use donor's value.
+    /// <para/>
+    /// Also appends new time for ETA-calculation purposes.
+    /// </summary>
+    /// <param name="donor">Currently called instance of <see cref="WriteProgressPlusCommand"/></param>
+    public void StartNewIteration(WriteProgressPlusCommand donor)
     {
-        if (currentIter > 0)
-            CurrentIteration = currentIter;
+        if (donor.CurrentIteration > 0)
+            ActualCurrentIteration = donor.CurrentIteration;
         else
-            CurrentIteration += increment;
+            ActualCurrentIteration += donor.Increment;
         Keeper.AddTime();
     }
 
     /// <summary>
-    /// Single stringbuiled to avoid making more objects.
+    /// Single stringbuilder to avoid making more objects. Used to create status message.
     /// </summary>
     private StringBuilder StatusBuilder { get; } = new StringBuilder();
 
     public TimeSpan GetRemainingTime(int totalCount)
     {
-        int left = totalCount - CurrentIteration;
+        int left = totalCount - ActualCurrentIteration;
         if (left < 0) return Negative;
         return Keeper.GetAverage().Multiply(left);
+    }
+
+    /// <inheritdoc cref="TimeKeeper.ShouldDisplay"/>
+    public bool ShouldDisplay() => Keeper.ShouldDisplay();
+
+    /// <summary>
+    /// Calculate percent done using donor's TotalCount and <see cref="ActualCurrentIteration"/>.
+    /// </summary>
+    /// <param name="donor"></param>
+    /// <returns>Tuple with calculated percentage and a flag whether current iteration is greater than total count.</returns>
+    private (int percentage, bool overflow) GetPercentage(WriteProgressPlusCommand donor)
+    {
+        int percentage;
+        bool overflow = false;
+        if (donor.TotalCount > 0)
+        {
+            percentage = ActualCurrentIteration * 100 / donor.TotalCount;
+            if (percentage > 100)
+            {
+                overflow = true;
+                percentage = 100;
+            }
+        }
+        else // No TotalCount means we cannot calculate percentage
+        {
+            percentage = 0;
+        }
+        return (percentage, overflow);
+    }
+
+    internal void UpdateRecord(WriteProgressPlusCommand donor)
+    {
+        StatusBuilder.Clear();
+        StartNewIteration(donor);
+        (int percentage, bool overflow) = GetPercentage(donor);
+        AppendFormattedItem(donor, percentage);
+        AppendCounter(donor);
+        AppendPercentage(donor, percentage, overflow);
+        int remainingSeconds = GetRemainingSeconds(donor);
+        AssociatedRecord.StatusDescription = StatusBuilder.ToString();
+        AssociatedRecord.RecordType = ProgressRecordType.Processing;
+        AssociatedRecord.Activity = donor.Activity;
+        AssociatedRecord.SecondsRemaining = remainingSeconds;
+        AssociatedRecord.ParentActivityId = donor.ParentID >= ProgressBase.Offset ? donor.ParentID : -1;
+        AssociatedRecord.PercentComplete = percentage;
+    }
+
+    private void AppendPercentage(WriteProgressPlusCommand donor, int percentage, bool overflow)
+    {
+        if (donor.TotalCount <= 0 || donor.NoPercentage)
+        {
+            return;
+        }
+
+        if (overflow)
+        {
+            StatusBuilder.Append("[Incorrect total count]");
+        }
+        else
+        {
+            StatusBuilder.AppendFormat(InvariantCulture, "{0:d2}%", percentage);
+        }
+    }
+
+    /// <summary>
+    /// Appends counter: (current / total) or (current).
+    /// </summary>
+    /// <param name="donor"></param>
+    private void AppendCounter(WriteProgressPlusCommand donor)
+    {
+        if (donor.NoCounter)
+        {
+            return;
+        }
+
+        StatusBuilder.AppendFormat(InvariantCulture, "{0:d3}", ActualCurrentIteration);
+        if (donor.TotalCount > 0) // append the total
+        {
+            StatusBuilder.Append('/').Append(donor.TotalCount);
+        }
+        StatusBuilder.Append(' '); // space for possible next parts
+    }
+
+    /// <summary>
+    /// Appends the formatted (either from properties or from script).
+    /// </summary>
+    /// <param name="donor"></param>
+    /// <param name="percentage">Percent done to be used as one of four script parameters.</param>
+    private void AppendFormattedItem(WriteProgressPlusCommand donor, int percentage)
+    {
+        // object hidden or null - skip
+        if (donor.HideObject || donor.InputObject is null)
+        {
+            return;
+        }
+        object[] package = [donor.InputObject, ActualCurrentIteration, percentage, donor.TotalCount];
+        if (donor.Formatter.FormatItem(package) is string formatted)
+        {
+            StatusBuilder.Append(formatted);
+            bool statusHasOnlyItem = donor.NoPercentage.IsPresent && donor.NoCounter.IsPresent;
+            // If there's more than object part in status - append a dash
+            if (!statusHasOnlyItem)
+            {
+                StatusBuilder.Append(" - ");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Calculates remaining time
+    /// </summary>
+    /// <param name="donor"></param>
+    /// <returns>Seconds to finish progress bar.</returns>
+    private int GetRemainingSeconds(WriteProgressPlusCommand donor)
+    {
+        int remainingSeconds = -1;
+        if (!donor.NoETA && donor.TotalCount > 0)
+        {
+            remainingSeconds = (int)GetRemainingTime(donor.TotalCount).TotalSeconds;
+        }
+
+        return remainingSeconds;
     }
 
     public void WriteProgress(Cmdlet parent)
@@ -66,81 +204,5 @@ public sealed class ProgressInner
         {
             CmdRuntime.WriteProgress(AssociatedRecord);
         }
-    }
-
-    public bool ShouldDisplay() => Keeper.ShouldDisplay();
-
-    internal void UpdateRecord(WriteProgressPlusCommand donor)
-    {
-        NewIteration(donor.Increment, donor.CurrentIteration);
-        StatusBuilder.Clear();
-        int percentage;
-        bool overflow = false;
-        if (donor.TotalCount > 0)
-        {
-            percentage = CurrentIteration * 100 / donor.TotalCount;
-            if (percentage > 100)
-            {
-                overflow = true;
-                percentage = 100;
-            }
-        }
-        else
-        {
-            int scale = 10;
-            TimeSpan elapsed = DateTime.Now - Keeper.StartTime;
-            int modulo = (int)elapsed.TotalSeconds % scale;
-#if NETSTANDARD2_0_OR_GREATER
-            int x = 100 - (scale - modulo) * (int)(100.0 / scale);
-            percentage = x >= 100 ? 99 : x < 0 ? 0 : x;
-#else
-            percentage = Math.Clamp(100 - (scale - modulo) * (int)(100.0 / scale), 1, 99);
-#endif
-        }
-        int remainingSeconds = -1;
-        if (!donor.NoETA && donor.TotalCount > 0)
-        {
-            remainingSeconds = (int)GetRemainingTime(donor.TotalCount).TotalSeconds;
-        }
-        if (!donor.HideObject && donor.InputObject is not null)
-        {
-            object[] package = { donor.InputObject, CurrentIteration, percentage, donor.TotalCount };
-            if (donor.Formatter.FormatItem(package) is string s)
-            {
-                StatusBuilder.Append(s);
-                if (!donor.NoPercentage.IsPresent || !donor.NoCounter.IsPresent)
-                {
-                    StatusBuilder.Append(" - ");
-                }
-            }
-        }
-
-        if (!donor.NoCounter)
-        {
-            StatusBuilder.AppendFormat(InvariantCulture, "{0:d3}", CurrentIteration);
-            if (donor.TotalCount > 0)
-            {
-                StatusBuilder.Append('/').Append(donor.TotalCount).Append(' ');
-            }
-            else
-            {
-                StatusBuilder.Append(' ');
-            }
-        }
-        if (donor.TotalCount > 0 && (!donor.NoPercentage || overflow))
-        {
-            if (overflow)
-                StatusBuilder.Append("[Incorrect total count]");
-            else
-            {
-                StatusBuilder.AppendFormat(InvariantCulture, "{0:d2}%", percentage);
-            }
-        }
-        AssociatedRecord.StatusDescription = StatusBuilder.ToString();
-        AssociatedRecord.RecordType = ProgressRecordType.Processing;
-        AssociatedRecord.Activity = donor.Activity;
-        AssociatedRecord.SecondsRemaining = remainingSeconds;
-        AssociatedRecord.ParentActivityId = donor.ParentID >= 0 ? donor.ParentID : -1;
-        AssociatedRecord.PercentComplete = percentage;
     }
 }
