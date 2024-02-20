@@ -62,6 +62,10 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     [Parameter()]
     public SwitchParameter PassThru { get; set; }
 
+    [Parameter()]
+    [Alias("Persist")]
+    public SwitchParameter KeepState { get; set; }
+
     internal readonly ItemFormatter Formatter = new();
 
     private bool MiddleOfPipe { get; set; }
@@ -69,6 +73,8 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     private bool PipelineMode { get; set; }
 
     private bool EmitItem { get; set; }
+
+    public long HistoryId => MyInvocation.HistoryId;
 
     private ProgressInner BarWorker { get; set; } = default!;
 
@@ -91,7 +97,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
         Formatter.Update(DisplayScript, DisplayProperties, DisplayPropertiesSeparator);
         try
         {
-            BarWorker = GetProgressInner(ID, ParentID, CommandRuntime);
+            BarWorker = GetProgressInner(this);
         }
         catch (ArgumentException e)
         {

@@ -9,15 +9,16 @@ public sealed class ProgressInner
 
     private readonly string Placeholder = "placeholder";
 
-    public ProgressInner(int id, int parentId, ICommandRuntime cmdr)
+    public ProgressInner(WriteProgressPlusCommand donor)
     {
-        Id = id;
-        ParentId = parentId < ProgressBase.Offset ? -1 : parentId;
+        Id = donor.ID;
+        ParentId = donor.ParentID < ProgressBase.Offset ? -1 : donor.ParentID;
         Keeper = new TimeKeeper();
-        AssociatedRecord = new(id, Placeholder, Placeholder);
+        AssociatedRecord = new(donor.ID, Placeholder, Placeholder);
         // try to reuse parentRuntime
         ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBase.ProgressDict[ParentId].CmdRuntime : null;
-        CmdRuntime = parentRuntime ?? cmdr;
+        CmdRuntime = parentRuntime ?? donor.CommandRuntime;
+        HistoryId = donor.HistoryId;
     }
 
     /// <summary>
@@ -26,7 +27,7 @@ public sealed class ProgressInner
     /// I found no other way to make sure that progress bar are reused,
     /// other than using the same CommandRuntime that was used to create it.
     /// </summary>
-    ICommandRuntime CmdRuntime { get; }
+    public ICommandRuntime CmdRuntime { get; }
 
     public int Id { get; }
 
@@ -35,6 +36,8 @@ public sealed class ProgressInner
     internal TimeKeeper Keeper { get; }
 
     internal ProgressRecord AssociatedRecord { get; }
+
+    public long HistoryId { get; }
 
     /// <summary>
     /// Actual iteration number, incremented automatically or specified by user.
@@ -192,17 +195,17 @@ public sealed class ProgressInner
         return remainingSeconds;
     }
 
-    public void WriteProgress(Cmdlet parent)
+    public void WriteProgress(Cmdlet? parent)
     {
         if (!ShouldDisplay()) return;
 
-        if (parent.CommandRuntime == CmdRuntime)
+        if (parent?.CommandRuntime == CmdRuntime)
         {
             parent.WriteProgress(AssociatedRecord);
         }
         else
         {
-            CmdRuntime.WriteProgress(AssociatedRecord);
+            CmdRuntime?.WriteProgress(AssociatedRecord);
         }
     }
 }
