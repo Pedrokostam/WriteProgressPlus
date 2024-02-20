@@ -15,14 +15,8 @@ Show a progress bar which can calculate estimated time and percentage.
 ```
 Write-ProgressPlus [-ID <Int32>] [-ParentID <Int32>] [-Activity <String>] [-TotalCount <Int32>]
  [-Increment <Int32>] [-CurrentIteration <Int32>] [-InputObject <Object>] [-NoETA]
- [-DisplayScript <ScriptBlock>] [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru]
- [<CommonParameters>]
-
- Write-ProgressPlus [-ID <Int32>] [-ParentID <Int32>] [-Activity <String>] [-TotalCount <Int32>]
- [-Increment <Int32>] [-CurrentIteration <Int32>] [-InputObject <Object>] [-NoETA]
- [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>]
- [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru]
- [<CommonParameters>]
+ [-DisplayScript <ScriptBlock>] [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>]
+ [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -40,16 +34,14 @@ Works similarly to Write-Progress, but automates many things, including:
 
 ### Example 1
 ```powershell
-PS C:\>1..100 | Write-ProgressPlus | %{Start-Sleep -seconds 1}
-
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
 
 ### Example 2
 ```powershell
-PS C:\>1..100 | Write-ProgressPlus -TotalCount 100 | %{Start-Sleep -seconds 1}
-
+PS C:\>1..100 | Write-ProgressPlus -TotalCount 100 | % {Start-Sleep -seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
@@ -58,8 +50,7 @@ Percentage of completion will be displayed, as well as estimated time to complet
 
 ### Example 3
 ```powershell
-PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties Hour, Minute, Second -DisplayPropertiesSeparator ":" | %{Start-Sleep -seconds 1}
-
+PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties Hour, Minute, Second -DisplayPropertiesSeparator ":" | % {Start-Sleep -seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
@@ -70,8 +61,7 @@ Percentage of completion will be displayed, as well as estimated time to complet
 
 ### Example 4
 ```powershell
-PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties *second | %{Start-Sleep -seconds 1}
-
+PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties *second | % {Start-Sleep -seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
@@ -82,11 +72,10 @@ Percentage of completion will be displayed, as well as estimated time to complet
 
 ### Example 5
 ```powershell
-PS C:\>100..300 | Write-ProgressPlus -TotalCount 200 -DisplayScript {[math]::sqrt($_)} | %{Start-Sleep -seconds 1}
-
+PS C:\>100..300 | Write-ProgressPlus -TotalCount 200 -DisplayScript {[math]::sqrt($_)} | % {Start-Sleep -seconds 1}
 ```
 
-Will display a progress which will update 200 times, displaying number of iterations passed.
+Will display a progress bar which will update 200 times, displaying number of iterations passed.
 
 The status will contain the square root of current object (10, 10.0498756211, 10.0995049384, ...)
 
@@ -94,8 +83,7 @@ Percentage of completion will be displayed, as well as estimated time to complet
 
 ### Example 6
 ```powershell
-PS D:\>Get-ChildItem -Directory | Write-ProgressPlus -ID 1 -DisplayProperties Name | %{$_ | Get-ChildItem -File | Write-ProgressPlus -ParentID 1 -ID 2 -DisplayProperties Name | %{Start-Sleep -Milliseconds 250; $_}}
-
+PS D:\>ls -Directory | WriPro -ID 1 -Properties Name | % {$_ | ls -File | WriPro -ParentID 1 -ID 2 -Properties Name | %{Start-Sleep -Milliseconds 250; $_}}
 ```
 
 Will display 2 nested progress bars.
@@ -111,8 +99,6 @@ PS D:\>foreach($i in 1..100){
 	Write-ProgressPlus -ID 1 -InputObject $i -TotalCount 100
 }
 Reset-ProgressPlus -ID 1
-
-
 ```
 
 Same progress bar as in Example 2, but not in pipeline.
@@ -383,6 +369,7 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+
 ### CommonParameters
 This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable, -InformationAction, -InformationVariable, -OutVariable, -OutBuffer, -PipelineVariable, -Verbose, -WarningAction, and -WarningVariable. For more information, see [about_CommonParameters](http://go.microsoft.com/fwlink/?LinkID=113216).
 
@@ -390,10 +377,12 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 
 ### System.Object
 	Any object can be inputted.
+
 ## OUTPUTS
 
 ### System.Object
 	If -PassThru is true, the input object is outputted, otherwise nothing is.
+
 ## NOTES
 
 ## RELATED LINKS
