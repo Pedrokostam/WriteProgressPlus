@@ -193,7 +193,18 @@ Accept wildcard characters: False
 Scriptblock used for formatting status string.
 
 The script receives 4 parameters: InputObject, CurrentIteration, PercentDone, TotalCount.
+
 Use $Args[0] to $Args[3] to access them. Alternatively, you can use their aliases: $_, $c, $p, $t, respectively.
+
+Example - for CurrentIteration = 12; TotalCount = 200, InputObject "Test"
+
+   {$_}        gives "Test"
+   
+   {$_.Length} gives "4"
+   
+   {"$c / $t"} gives "12 / 200"
+   
+   {$p}        gives "6" (notice lack of percent sign)
 
 Will override DisplayProperties.
 
