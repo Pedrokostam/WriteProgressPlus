@@ -71,7 +71,9 @@ public sealed class WriteProgressPlusCommand : ProgressBase
         MiddleOfPipe = pipeLength > pipePosition;
         PipelineMode = MyInvocation.ExpectingInput;
         EmitItem = PassThru || MiddleOfPipe;
+#if DEBUG
         WriteDebug(PipelineMode ? "Pipeline mode" : "Iterative mode");
+#endif
         Formatter.Update(DisplayScript, DisplayProperties, DisplayPropertiesSeparator);
         try
         {
