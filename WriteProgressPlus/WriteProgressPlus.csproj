@@ -8,7 +8,7 @@
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<OutputType>Library</OutputType>
 		<Authors>Maciej Krosta</Authors>
-		<Version>0.9.0</Version>
+		<Version>0.9.5</Version>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
 		<Description>Wrapper around WriteProgress, which automates its functionalities and allows simpler control.</Description>
