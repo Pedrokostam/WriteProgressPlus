@@ -1,6 +1,6 @@
 ﻿using System.Management.Automation;
 using System.Text;
-
+using static System.Globalization.CultureInfo;
 namespace WriteProgressPlus.Components;
 public sealed class ProgressInner
 {
@@ -109,7 +109,7 @@ public sealed class ProgressInner
 
         if (!donor.NoCounter)
         {
-            StatusBuilder.Append(CurrentIteration.ToString("d3"));
+            StatusBuilder.AppendFormat(InvariantCulture, "{0:d3}", CurrentIteration);
             if (donor.TotalCount > 0)
             {
                 StatusBuilder.Append('/').Append(donor.TotalCount).Append(' ');
@@ -125,7 +125,7 @@ public sealed class ProgressInner
                 StatusBuilder.Append("[Incorrect total count]");
             else
             {
-                StatusBuilder.Append(percentage.ToString("d2")).Append('%');
+                StatusBuilder.AppendFormat(InvariantCulture, "{0:d2}%", percentage);
             }
         }
         AssociatedRecord.StatusDescription = StatusBuilder.ToString();
