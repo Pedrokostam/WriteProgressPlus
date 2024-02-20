@@ -165,7 +165,7 @@ Overriden by DisplayScript.
 ```yaml
 Type: String[]
 Parameter Sets: (All)
-Aliases:
+Aliases: Properties
 
 Required: False
 Position: Named
@@ -180,7 +180,7 @@ If DisplayProperties are specified, this string will be used to join them.
 ```yaml
 Type: String
 Parameter Sets: (All)
-Aliases:
+Aliases: Separator
 
 Required: False
 Position: Named
@@ -211,7 +211,7 @@ Will override DisplayProperties.
 ```yaml
 Type: ScriptBlock
 Parameter Sets: (All)
-Aliases:
+Aliases: Script
 
 Required: False
 Position: Named

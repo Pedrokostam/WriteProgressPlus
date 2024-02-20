@@ -35,13 +35,16 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     public SwitchParameter NoETA { get; set; }
 
     [Parameter()]
+    [Alias("Script")]
     public ScriptBlock? DisplayScript { get; set; }
 
     [Parameter()]
+    [Alias("Properties")]
     public string[]? DisplayProperties { get; set; }
 
     [Parameter()]
     [ValidateNotNullOrEmpty]
+    [Alias("Separator")]
     public string DisplayPropertiesSeparator { get; set; } = ", ";
 
     [Parameter()]
