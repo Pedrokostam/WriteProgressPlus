@@ -21,14 +21,17 @@ internal class TimeKeeper
     {
         StartTime = DateTime.Now;
         Buffer = new(calculationLength);
-        LastDisplayed = StartTime - UpdatePeriod.Multiply(5);
+        // Make sure the first iteration can be displayed
+        LastDisplayed = StartTime - UpdatePeriod.Multiply(5); 
     }
 
     public TimeKeeper() : this(CalculationLength)
     { }
 
+    /// <inheritdoc cref="TimeBuffer.AddTime()"/>
     public void AddTime() => Buffer.AddTime();
 
+    /// <inheritdoc cref="TimeBuffer.CalculateMovingAverageTime()"/>
     public TimeSpan GetAverage() => Buffer.CalculateMovingAverageTime();
 
     /// <summary>

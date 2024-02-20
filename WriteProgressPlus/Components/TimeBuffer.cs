@@ -10,8 +10,14 @@ class TimeBuffer
 
     public int MaxLength { get; }
 
+    /// <summary>
+    /// How many elements wre inserted.
+    /// </summary>
     private int CurrentIndex = 0;
 
+    /// <summary>
+    /// Where to put the NEXT element.
+    /// </summary>
     private int InsertionIndex => CurrentIndex % MaxLength;
 
     public TimeBuffer(int calculationLength)
@@ -19,26 +25,52 @@ class TimeBuffer
         MaxLength = calculationLength > 0 ? calculationLength : 1;
         timeSpans = new TimeSpan[MaxLength];
     }
-
+    /// <summary>
+    /// Adds current datetime to time buffer.
+    /// </summary>
     public void AddTime() => AddTime(DateTime.Now);
 
+    /// <summary>
+    /// Adds given datetime to time buffer.
+    /// </summary>
     public void AddTime(DateTime time)
     {
-        timeSpans[InsertionIndex] = time - LastDataPoint;
-        LastDataPoint = time;
-        CurrentIndex++;
-    }
-
-    public TimeSpan CalculateMovingAverageTime()
-    {
-        if (CurrentIndex == 0) return TimeSpan.Zero;
-        if (CurrentIndex < MaxLength)
+        //If LastDataPoint is at its starting value, instead of adding time to the buffer, set LastDataPoint to its value.
+        if (LastDataPoint == DateTime.MinValue)
         {
-            return TimeSpan.FromMilliseconds(timeSpans.Take(CurrentIndex).Average(x => x.Milliseconds));
+            LastDataPoint = time;
         }
         else
         {
-            return TimeSpan.FromMilliseconds(timeSpans.Average(x => x.Milliseconds));
+            timeSpans[InsertionIndex] = time - LastDataPoint;
+            LastDataPoint = time;
+            CurrentIndex++;
         }
+    }
+
+
+    /// <summary>
+    /// Calculates estimated time to completion.
+    /// </summary>
+    /// <returns></returns>
+    public TimeSpan CalculateMovingAverageTime()
+    {
+        // If we haven't filled the whole buffer, take only until CurrentIndex,
+        // otherwise take the whole length
+        int end = CurrentIndex < MaxLength ? CurrentIndex : MaxLength;
+        if (end == 0)
+        {
+            // Won't be able to divide by zero
+            return TimeSpan.Zero;
+        }
+
+        long tickSum = 0;
+        for (int i = 0; i < end; i++)
+        {
+            tickSum += timeSpans[i].Ticks;
+        }
+        long tickMean = tickSum / end;
+        
+        return TimeSpan.FromTicks(tickMean);
     }
 }
