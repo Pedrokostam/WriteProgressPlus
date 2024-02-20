@@ -14,9 +14,9 @@ Show a progress bar which can calculate estimated time and percentage.
 
 ```
 Write-ProgressPlus [-ID <Int32>] [-ParentID <Int32>] [-Activity <String>] [-TotalCount <Int32>]
- [-Increment <Int32>] [-CurrentIteration <Int32>] [-InputObject <Object>] [-NoETA]
- [-DisplayScript <ScriptBlock>] [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>]
- [-HideObject] [-NoCounter] [-NoPercentage] [-PassThru] [<CommonParameters>]
+ [-Increment <Int32>] [-CurrentIteration <Int32>] [-InputObject <Object>] [-DisplayScript <ScriptBlock>]
+ [-DisplayProperties <String[]>] [-DisplayPropertiesSeparator <String>] [-HideObject] [-NoCounter]
+ [-NoPercentage] [-NoETA] [-PassThru] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -107,6 +107,41 @@ If Reset-ProgressPlus is not called, subsequent calls to this bar ID will contin
 
 ## PARAMETERS
 
+### -ID
+Unique ID of progress bar. Used for nesting progress bars.
+
+While IDs is shared with ordinary Write-Progress, 
+this module offsets all IDs, so there should not be any conflict.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -ParentID
+ID of parent progress bar. Used to create sub-bars.
+
+To make parent independent, set to a negative value.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases:
+
+Required: False
+Position: Named
+Default value: -1
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -Activity
 Activity description. Will be showed before progress bar.
 
@@ -124,10 +159,29 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -CurrentIteration
-Overrides the calculated iteration.
+### -TotalCount
+Total count of expected iterations.
 
-Works similar to its analogue in WriteProgress
+If positive, will enable showing percent done (and accurate progress length) and time remaining.
+
+If at any time iteration exceeds TotalCount, command will continue wokring, but a warning will be displayed in status.
+
+```yaml
+Type: Int32
+Parameter Sets: (All)
+Aliases: Count
+
+Required: False
+Position: Named
+Default value: -1
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
+### -Increment
+How much to increase the CurrentIteration if it was not specified.
+
+If CurrentIteration is specified, Increment is ignored. Set to zero to freeze the progress bar.
 
 ```yaml
 Type: Int32
@@ -136,22 +190,20 @@ Aliases:
 
 Required: False
 Position: Named
-Default value: None
+Default value: 1
 Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -DisplayProperties
-List of property names of the input object to format into status.
+### -CurrentIteration
+Overrides the calculated iteration.
 
-You can use wildcard, for example if the InputObject is a DateTime, specifying *second will give both Seconds and Milliseconds.
-
-Overriden by DisplayScript.
+Works similar to its analogue in WriteProgress
 
 ```yaml
-Type: String[]
+Type: Int32
 Parameter Sets: (All)
-Aliases: Properties
+Aliases: Iteration
 
 Required: False
 Position: Named
@@ -160,18 +212,18 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -DisplayPropertiesSeparator
-If DisplayProperties are specified, this string will be used to join them.
+### -InputObject
+Current object. If specified, can be used for formatting status.
 
 ```yaml
-Type: String
+Type: Object
 Parameter Sets: (All)
-Aliases: Separator
+Aliases:
 
 Required: False
 Position: Named
-Default value: ", "
-Accept pipeline input: False
+Default value: None
+Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
@@ -206,6 +258,40 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -DisplayProperties
+List of property names of the input object to format into status.
+
+You can use wildcard, for example if the InputObject is a DateTime, specifying *second will give both Seconds and Milliseconds.
+
+Overriden by DisplayScript.
+
+```yaml
+Type: String[]
+Parameter Sets: (All)
+Aliases: Properties
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
+Accept wildcard characters: True
+```
+
+### -DisplayPropertiesSeparator
+If DisplayProperties are specified, this string will be used to join them.
+
+```yaml
+Type: String
+Parameter Sets: (All)
+Aliases: Separator
+
+Required: False
+Position: Named
+Default value: ", "
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -HideObject
 If specified, hides object (and its formatting) from status
 
@@ -218,56 +304,6 @@ Required: False
 Position: Named
 Default value: None
 Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -ID
-Unique ID of progress bar. Used for nesting progress bars.
-
-While IDs is shared with ordinary Write-Progress, 
-this module offsets all IDs, so there should not be any conflict.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -Increment
-How much to increase the CurrentIteration if it was not specified.
-
-If CurrentIteration is specified, Increment is ignored. Set to zero to freeze the progress bar.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: 1
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -InputObject
-Current object. If specified, can be used for formatting status.
-
-```yaml
-Type: Object
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: True (ByValue)
 Accept wildcard characters: False
 ```
 
@@ -316,23 +352,6 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
-### -ParentID
-ID of parent progress bar. Used to create sub-bars.
-
-To make parent independent, set to a negative value.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: -1
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -PassThru
 if specified, will emit the input object.
 
@@ -346,25 +365,6 @@ Aliases:
 Required: False
 Position: Named
 Default value: true for pipeline mode, false otherwise
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
-### -TotalCount
-Total count of expected iterations.
-
-If positive, will enable showing percent done (and accurate progress length) and time remaining.
-
-If at any time iteration exceeds TotalCount, command will continue wokring, but a warning will be displayed in status.
-
-```yaml
-Type: Int32
-Parameter Sets: (All)
-Aliases:
-
-Required: False
-Position: Named
-Default value: -1
 Accept pipeline input: False
 Accept wildcard characters: False
 ```

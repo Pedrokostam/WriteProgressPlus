@@ -19,6 +19,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     public string Activity { get; set; } = "Processing...";
 
     [Parameter()]
+    [Alias("Count")]
     [ValidateRange(1, int.MaxValue)]
     public int TotalCount { get; set; } = -1;
 
@@ -26,24 +27,23 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     public int Increment { get; set; } = 1;
 
     [Parameter()]
+    [Alias("Iteration")]
     public int CurrentIteration { get; set; } = -1;
 
     [Parameter(ValueFromPipeline = true)]
     public object? InputObject { get; set; }
 
     [Parameter()]
-    public SwitchParameter NoETA { get; set; }
-
-    [Parameter()]
     [Alias("Script")]
     public ScriptBlock? DisplayScript { get; set; }
 
     [Parameter()]
+    [SupportsWildcards()]
     [Alias("Properties")]
     public string[]? DisplayProperties { get; set; }
 
     [Parameter()]
-    [ValidateNotNullOrEmpty]
+    [ValidateNotNull]
     [Alias("Separator")]
     public string DisplayPropertiesSeparator { get; set; } = ", ";
 
@@ -57,7 +57,10 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     public SwitchParameter NoPercentage { get; set; }
 
     [Parameter()]
-    public SwitchParameter PassThru { get; set; } // PassThru is only in pipeline, so no need to store its state
+    public SwitchParameter NoETA { get; set; }
+
+    [Parameter()]
+    public SwitchParameter PassThru { get; set; }
 
     internal readonly ItemFormatter Formatter = new();
 
@@ -67,20 +70,24 @@ public sealed class WriteProgressPlusCommand : ProgressBase
 
     private bool EmitItem { get; set; }
 
-    private ProgressInner? BarWorker { get; set; }
+    private ProgressInner BarWorker { get; set; } = default!;
 
     protected override void BeginProcessing()
     {
         ID += Offset;
         ParentID += Offset;
+
         int pipePosition = MyInvocation.PipelinePosition;
         int pipeLength = MyInvocation.PipelineLength;
+
         MiddleOfPipe = pipeLength > pipePosition;
         PipelineMode = MyInvocation.ExpectingInput;
         EmitItem = PassThru || MiddleOfPipe;
+
 #if DEBUG
         WriteDebug(PipelineMode ? "Pipeline mode" : "Iterative mode");
 #endif
+        // Update formatter with new format sources
         Formatter.Update(DisplayScript, DisplayProperties, DisplayPropertiesSeparator);
         try
         {
@@ -98,8 +105,8 @@ public sealed class WriteProgressPlusCommand : ProgressBase
 
     protected override void ProcessRecord()
     {
-        BarWorker!.UpdateRecord(this);
-        BarWorker!.WriteProgress(this);
+        BarWorker.UpdateRecord(this);
+        BarWorker.WriteProgress(this);
         if (EmitItem)
         {
             WriteObject(InputObject);

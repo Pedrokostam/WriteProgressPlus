@@ -14,12 +14,12 @@ Reset progress bar status for the specified id, or for all of them.
 
 ### NORMAL
 ```
-Reset-ProgressPlus [-ID <Int32[]>] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Reset-ProgressPlus [-ID <Int32[]>] [<CommonParameters>]
 ```
 
 ### ALL
 ```
-Reset-ProgressPlus [-All] [-ProgressAction <ActionPreference>] [<CommonParameters>]
+Reset-ProgressPlus [-All] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -47,21 +47,6 @@ Resets progress status of progress bars with IDs 1, 2, 3
 
 ## PARAMETERS
 
-### -All
-If specified, the command will remove status for all progress bars started by Write-ProgressPlus.
-
-```yaml
-Type: SwitchParameter
-Parameter Sets: ALL
-Aliases:
-
-Required: False
-Position: Named
-Default value: None
-Accept pipeline input: False
-Accept wildcard characters: False
-```
-
 ### -ID
 IDs of the progress status to be removed.
 
@@ -74,6 +59,21 @@ Required: False
 Position: Named
 Default value: None
 Accept pipeline input: True (ByPropertyName, ByValue)
+Accept wildcard characters: False
+```
+
+### -All
+If specified, the command will remove status for all progress bars started by Write-ProgressPlus.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: ALL
+Aliases:
+
+Required: False
+Position: Named
+Default value: None
+Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
