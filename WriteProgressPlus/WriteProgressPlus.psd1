@@ -30,7 +30,7 @@
     Copyright          = '(c) Maciej Krosta. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description        = 'Wrapper around WriteProgress, which automates its functionalities and allows simpler control, including support for in-pipeline placement.'
+    Description        = 'Extension of the standard WriteProgress, which simplifies control, automates its functionalities and extends its capabilities, including support for in-pipeline placement. Write-ProgressPlus is a cmdlet can calculate remaining time, track current iteration and calculate percentage, preserve state across commands and automatically create status message.'
 
     # Minimum version of the PowerShell engine required by this module
     PowerShellVersion  = '5.1'
