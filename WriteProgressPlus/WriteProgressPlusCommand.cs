@@ -21,10 +21,10 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 
     [Parameter()]
     [Alias("Count")]
-    [ValidateRange(1, int.MaxValue)]
     public int TotalCount { get; set; } = -1;
 
     [Parameter()]
+    [ValidateRange(0, int.MaxValue)]
     public int Increment { get; set; } = 1;
 
     [Parameter()]
