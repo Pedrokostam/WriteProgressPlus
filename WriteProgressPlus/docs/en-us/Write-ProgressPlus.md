@@ -144,7 +144,7 @@ Since the pipeline bar has KeepState, it will not cleanup its state.
 ### -ID
 Unique ID of progress bar. Used for nesting progress bars.
 
-While IDs is shared with ordinary Write-Progress, 
+While IDs is shared with ordinary Write-Progress,
 this module offsets all IDs, so there should not be any conflict.
 
 ```yaml
@@ -392,6 +392,7 @@ If specified, progress bar status will be preserved across different commands (t
 By default, the state is removed when the calling instance is from a different command - this parameter can prevent that.
 
 When KeepState is true, the cmdlet will attempt to reuse exisiting state, even if it is from a different command.
+
 Also, if KeepState is true when cmdlet is used in a pipeline, it will prevent automatic deletion of its state at the completion of the pipeline.
 
 ```yaml
@@ -409,7 +410,7 @@ Accept wildcard characters: False
 ### -PassThru
 if specified, will emit the input object.
 
-If this cmdlet is in the middle of a pipeline, this parameter if set to true and cannot be changed
+If this cmdlet is in the middle of a pipeline, this parameter if set to true and cannot be changed.
 
 ```yaml
 Type: SwitchParameter
