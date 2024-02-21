@@ -56,9 +56,7 @@ public class ProgressBase : PSCmdlet
             progressInner.AssociatedRecord.PercentComplete = 100;
             progressInner.WriteProgress(null);
         }
-#if DEBUG
-        progressInner.CmdRuntime?.WriteDebug(Invariant($"Removed state for progress bar {id - Offset}"));
-#endif
+        Debug.WriteLine(Invariant($"Removed state for progress bar {id - Offset}"));
         ProgressDict.Remove(id);
         return true;
     }

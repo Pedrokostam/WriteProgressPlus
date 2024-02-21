@@ -90,9 +90,8 @@ public sealed class WriteProgressPlusCommand : ProgressBase
         PipelineMode = MyInvocation.ExpectingInput;
         EmitItem = PassThru || MiddleOfPipe;
 
-#if DEBUG
-        WriteDebug(PipelineMode ? "Pipeline mode" : "Iterative mode");
-#endif
+        Debug.WriteLine(PipelineMode ? "Pipeline mode" : "Iterative mode");
+
         // Update formatter with new format sources
         Formatter.Update(DisplayScript, DisplayProperties, DisplayPropertiesSeparator);
         try
