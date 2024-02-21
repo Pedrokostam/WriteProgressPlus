@@ -194,11 +194,11 @@ Accept wildcard characters: False
 ```
 
 ### -TotalCount
-Total count of expected iterations.
-
-If positive, will enable showing percent done (and accurate progress length) and time remaining.
+Total count of expected iterations. If positive, will enable showing percent done (and accurate progress length) and time remaining.
 
 If at any time iteration exceeds TotalCount, cmdlet will continue working, but a warning will be displayed in status.
+
+User can provide anything convertible to integer, as well as instance of ICollection (will take its Count).
 
 ```yaml
 Type: Int32

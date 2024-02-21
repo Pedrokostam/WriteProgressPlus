@@ -21,6 +21,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 
     [Parameter()]
     [Alias("Count")]
+    [CollectionToLengthTransformation]
     public int TotalCount { get; set; } = -1;
 
     [Parameter()]
