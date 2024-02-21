@@ -1,4 +1,5 @@
 ﻿using System.Management.Automation;
+using System.Diagnostics;
 using WriteProgressPlus.Components;
 
 namespace WriteProgressPlus;
@@ -111,7 +112,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     protected override void ProcessRecord()
     {
         BarWorker.UpdateRecord(this);
-        BarWorker.WriteProgress(this);
+        BarWorker.WriteProgress();
         if (EmitItem)
         {
             WriteObject(InputObject);

@@ -1,4 +1,5 @@
 ﻿using System.Management.Automation;
+using System.Diagnostics;
 using static System.FormattableString;
 namespace WriteProgressPlus.Components;
 public class ProgressBase : PSCmdlet
@@ -9,12 +10,12 @@ public class ProgressBase : PSCmdlet
 
     public static ProgressInner GetProgressInner(WriteProgressPlusCommand current)
     {
-        if (ProgressDict.TryGetValue(current.ID, out ProgressInner? pi))
+        if (ProgressDict.TryGetValue(current.ID, out ProgressInner? existingProgressInner))
         {
-            if (current.KeepState.IsPresent || pi.HistoryId == current.HistoryId)
+            if (current.KeepState.IsPresent || existingProgressInner.HistoryId == current.HistoryId)
             {
                 // If the history ids match, or if user requested state keeping, return the existing state
-                return pi;
+                return existingProgressInner;
             }
             else // HistoryId is different and user does not want to keep state
             {
@@ -37,10 +38,7 @@ public class ProgressBase : PSCmdlet
         ProgressDict.Add(current.ID, p);
         return p;
     }
-    public static bool RemoveProgressInner(int id)
-    {
-        return RemoveProgressInner(id, true);
-    }
+    public static bool RemoveProgressInner(int id) => RemoveProgressInner(id, true);
     private static bool RemoveProgressInner(int id, bool writeCompleted)
     {
         if (!ProgressDict.TryGetValue(id, out ProgressInner? progressInner))
@@ -50,11 +48,14 @@ public class ProgressBase : PSCmdlet
         if (writeCompleted)
         {
             // Set recordtype to completed
-            // DOn't know if it does something though, might want to test it
-            // TODO: Check if RecordType being completed does anything
+            // According to documentation, each bar should be written once with RecordType set to Completed
+            // Tihs ensures that the bar will be removed
             progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
             progressInner.AssociatedRecord.PercentComplete = 100;
-            progressInner.WriteProgress(null);
+            progressInner.WriteProgress();
+            // However, if the state is being removed, because a new bar from different command is requested
+            // We should not complete it - the bar should be reused
+            // Thus we skip this section altogether if writeCompleted is false
         }
         Debug.WriteLine(Invariant($"Removed state for progress bar {id - Offset}"));
         ProgressDict.Remove(id);

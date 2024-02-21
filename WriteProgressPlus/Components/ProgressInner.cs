@@ -196,25 +196,13 @@ public sealed class ProgressInner
         return remainingSeconds;
     }
 
-    public void WriteProgress(Cmdlet? parent)
+    public void WriteProgress()
     {
-        // TODO: Is there a reason to use parent's Runtime? CmdRuntime should either be parent or the proper one anyway
         if (!ShouldDisplay())
         {
             return;
         }
-
-        Debug.WriteLine("will display");
-        if (parent?.CommandRuntime == CmdRuntime
-            )
-        {
-            Debug.WriteLine("parent");
-            parent.WriteProgress(AssociatedRecord);
-        }
-        else
-        {
-            Debug.WriteLine("cmdruntime");
-            CmdRuntime?.WriteProgress(AssociatedRecord);
-        }
+        Debug.WriteLine("cmdruntime");
+        CmdRuntime?.WriteProgress(AssociatedRecord);
     }
 }
