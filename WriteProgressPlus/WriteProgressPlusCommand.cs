@@ -3,68 +3,69 @@ using System.Diagnostics;
 using WriteProgressPlus.Components;
 
 namespace WriteProgressPlus;
+
 [Cmdlet(VerbsCommunications.Write, "ProgressPlus")]
 [Alias("WriPro")]
 [CmdletBinding(PositionalBinding = false)]
 public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 {
-    [Parameter()]
+    [Parameter]
     [ValidateRange(0, int.MaxValue)]
     public int ID { get; set; } = 1;
 
-    [Parameter()]
+    [Parameter]
     public int ParentID { get; set; } = -1;
 
-    [Parameter()]
+    [Parameter]
     [ValidateNotNull]
     public string Activity { get; set; } = "Processing...";
 
-    [Parameter()]
+    [Parameter]
     [Alias("Count")]
     [CollectionToLengthTransformation]
     public int TotalCount { get; set; } = -1;
 
-    [Parameter()]
+    [Parameter]
     [ValidateRange(0, int.MaxValue)]
     public int Increment { get; set; } = 1;
 
-    [Parameter()]
+    [Parameter]
     [Alias("Iteration")]
     public int CurrentIteration { get; set; } = -1;
 
     [Parameter(ValueFromPipeline = true)]
     public object? InputObject { get; set; }
 
-    [Parameter()]
+    [Parameter]
     [Alias("Script")]
     public ScriptBlock? DisplayScript { get; set; }
 
-    [Parameter()]
-    [SupportsWildcards()]
+    [Parameter]
+    [SupportsWildcards]
     [Alias("Properties")]
     public string[]? DisplayProperties { get; set; }
 
-    [Parameter()]
+    [Parameter]
     [ValidateNotNull]
     [Alias("Separator")]
     public string DisplayPropertiesSeparator { get; set; } = ", ";
 
-    [Parameter()]
+    [Parameter]
     public SwitchParameter HideObject { get; set; }
 
-    [Parameter()]
+    [Parameter]
     public SwitchParameter NoCounter { get; set; }
 
-    [Parameter()]
+    [Parameter]
     public SwitchParameter NoPercentage { get; set; }
 
-    [Parameter()]
+    [Parameter]
     public SwitchParameter NoETA { get; set; }
 
-    [Parameter()]
+    [Parameter]
     public SwitchParameter PassThru { get; set; }
 
-    [Parameter()]
+    [Parameter]
     [Alias("Persist")]
     public SwitchParameter KeepState { get; set; }
 

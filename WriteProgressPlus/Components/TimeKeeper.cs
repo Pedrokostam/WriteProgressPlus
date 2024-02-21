@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Management.Automation;
-
-namespace WriteProgressPlus.Components;
+﻿namespace WriteProgressPlus.Components;
 
 /// <summary>
 /// Controls how often a progress bar can update, keeps track of iteration times and calculates ETA.

@@ -1,7 +1,9 @@
 ﻿using System.Management.Automation;
 using System.Diagnostics;
 using static System.FormattableString;
+
 namespace WriteProgressPlus.Components;
+
 public class ProgressBaseCommand : PSCmdlet
 {
     internal const int Offset = 2137;

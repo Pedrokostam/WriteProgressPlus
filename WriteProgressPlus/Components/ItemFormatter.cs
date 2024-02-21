@@ -2,7 +2,9 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
 using static System.FormattableString;
+
 namespace WriteProgressPlus.Components;
+
 public partial class ItemFormatter
 {
     private readonly static string DefaultSeparator = " ";

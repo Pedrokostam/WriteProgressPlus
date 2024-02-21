@@ -1,17 +1,19 @@
 ﻿using System.Management.Automation;
 using WriteProgressPlus.Components;
 using static System.FormattableString;
+
 namespace WriteProgressPlus;
+
 [Cmdlet(VerbsCommon.Reset, "ProgressPlus")]
 [OutputType(typeof(void))]
 [Alias("ResPro")]
 [CmdletBinding(PositionalBinding = true, DefaultParameterSetName = "NORMAL")]
 public sealed class ResetProgressPlusCommand : ProgressBaseCommand
 {
-    [Parameter(Position=0,ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName ="NORMAL")]
+    [Parameter(Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName = "NORMAL")]
     public int[]? ID { get; set; }
 
-    [Parameter(ParameterSetName="ALL")]
+    [Parameter(ParameterSetName = "ALL")]
     public SwitchParameter All { get; set; }
 
     protected override void BeginProcessing()

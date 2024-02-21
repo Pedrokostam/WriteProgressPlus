@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
-using System.Drawing;
-using System.Management.Automation;
+﻿using System.Management.Automation;
 using System.Text;
 using static System.Globalization.CultureInfo;
+
 namespace WriteProgressPlus.Components;
+
 public sealed class ProgressState
 {
     private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
