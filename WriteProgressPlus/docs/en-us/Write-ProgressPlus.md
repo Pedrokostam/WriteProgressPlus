@@ -92,7 +92,7 @@ The main one will updated for each folder showing folder name in its status.
 
 The nested one will updated for every file in currently processed folder.
 
-### Example 6
+### Example 7
 ```powershell
 PS D:\>foreach($i in 1..100){
 	Start-Sleep -Milliseconds 500
@@ -105,12 +105,46 @@ Same progress bar as in Example 2, but not in pipeline.
 
 If Reset-ProgressPlus is not called, subsequent calls to this bar ID will continue from 100.
 
+### Example 8
+```powershell
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
+```
+
+Same progress bar as in Example 1, but two subsequent bars will appear. Both bars will start at its iteration counter at zero.
+
+Reset-Progress is not needed, since pipeline mode takes care of cleanup.
+
+### Example 9
+```powershell
+PS C:\>1..100 | Write-ProgressPlus -KeepState | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | Write-ProgressPlus -KeepState | % {Start-Sleep -seconds 1}
+```
+
+Same progress bar as in Example 8, but the bars will share the iteration counter (the second bar will end at 200)
+
+### Example 10
+```powershell
+PS C:\>Write-Progress
+PS C:\>Write-Progress -KeepState
+PS C:\>Write-Progress -KeepState
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
+```
+
+First 3 commands will increase the iteration count by 1, so the pipeline bar will start at iteration 3.
+
+Without KeepState all the commands would start at 0, resetting each other's states.
+
+Notice that KeepState was not specified on the first command, as it is not needed.
+
+Since the pipeline bar has KeepState, it will not cleanup its state.
+
 ## PARAMETERS
 
 ### -ID
 Unique ID of progress bar. Used for nesting progress bars.
 
-While IDs is shared with ordinary Write-Progress, 
+While IDs is shared with ordinary Write-Progress,
 this module offsets all IDs, so there should not be any conflict.
 
 ```yaml
@@ -164,7 +198,7 @@ Total count of expected iterations.
 
 If positive, will enable showing percent done (and accurate progress length) and time remaining.
 
-If at any time iteration exceeds TotalCount, command will continue wokring, but a warning will be displayed in status.
+If at any time iteration exceeds TotalCount, cmdlet will continue working, but a warning will be displayed in status.
 
 ```yaml
 Type: Int32
@@ -352,10 +386,31 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -KeepState
+If specified, progress bar status will be preserved across different commands (the ones listed in Get-History).
+
+By default, the state is removed when the calling instance is from a different command - this parameter can prevent that.
+
+When KeepState is true, the cmdlet will attempt to reuse exisiting state, even if it is from a different command.
+
+Also, if KeepState is true when cmdlet is used in a pipeline, it will prevent automatic deletion of its state at the completion of the pipeline.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: Persist
+
+Required: False
+Position: Named
+Default value: false
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -PassThru
 if specified, will emit the input object.
 
-If this command is in the middle of a pipeline, this parameter if set to true and cannot be changed
+If this cmdlet is in the middle of a pipeline, this parameter if set to true and cannot be changed.
 
 ```yaml
 Type: SwitchParameter
@@ -381,7 +436,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Object
-	If -PassThru is true, the input object is outputted, otherwise nothing is.
+	If -PassThru is true (or used in the middle of a pipeline), the input object is outputted, otherwise nothing is.
 
 ## NOTES
 

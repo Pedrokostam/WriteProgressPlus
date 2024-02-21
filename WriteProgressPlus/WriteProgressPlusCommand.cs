@@ -1,11 +1,12 @@
 ﻿using System.Management.Automation;
+using System.Diagnostics;
 using WriteProgressPlus.Components;
 
 namespace WriteProgressPlus;
 [Cmdlet(VerbsCommunications.Write, "ProgressPlus")]
 [Alias("WriPro")]
 [CmdletBinding(PositionalBinding = false)]
-public sealed class WriteProgressPlusCommand : ProgressBase
+public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 {
     [Parameter()]
     [ValidateRange(0, int.MaxValue)]
@@ -20,10 +21,10 @@ public sealed class WriteProgressPlusCommand : ProgressBase
 
     [Parameter()]
     [Alias("Count")]
-    [ValidateRange(1, int.MaxValue)]
     public int TotalCount { get; set; } = -1;
 
     [Parameter()]
+    [ValidateRange(0, int.MaxValue)]
     public int Increment { get; set; } = 1;
 
     [Parameter()]
@@ -62,6 +63,10 @@ public sealed class WriteProgressPlusCommand : ProgressBase
     [Parameter()]
     public SwitchParameter PassThru { get; set; }
 
+    [Parameter()]
+    [Alias("Persist")]
+    public SwitchParameter KeepState { get; set; }
+
     internal readonly ItemFormatter Formatter = new();
 
     private bool MiddleOfPipe { get; set; }
@@ -70,10 +75,23 @@ public sealed class WriteProgressPlusCommand : ProgressBase
 
     private bool EmitItem { get; set; }
 
-    private ProgressInner BarWorker { get; set; } = default!;
+    internal long HistoryId => MyInvocation.HistoryId;
+
+    private ProgressState BarWorker { get; set; } = default!;
 
     protected override void BeginProcessing()
     {
+        if (ID == ParentID)
+        {
+            var errorRecord = new ErrorRecord(
+                new IdConflictException(),
+                "ParentIdSameAsId",
+                ErrorCategory.InvalidArgument,
+                this
+                );
+            ThrowTerminatingError(errorRecord);
+        }
+
         ID += Offset;
         ParentID += Offset;
 
@@ -84,29 +102,36 @@ public sealed class WriteProgressPlusCommand : ProgressBase
         PipelineMode = MyInvocation.ExpectingInput;
         EmitItem = PassThru || MiddleOfPipe;
 
-#if DEBUG
-        WriteDebug(PipelineMode ? "Pipeline mode" : "Iterative mode");
-#endif
+        Debug.WriteLine(PipelineMode ? "Pipeline mode" : "Iterative mode");
+
         // Update formatter with new format sources
         Formatter.Update(DisplayScript, DisplayProperties, DisplayPropertiesSeparator);
         try
         {
-            BarWorker = GetProgressInner(ID, ParentID, CommandRuntime);
+            BarWorker = GetProgressInner(this);
         }
-        catch (ArgumentException e)
+        catch (ArgumentException argumentException)
         {
-            ThrowTerminatingError(new ErrorRecord(e, e.Source, ErrorCategory.InvalidArgument, this));
+            var errorRecord = new ErrorRecord(argumentException,
+                                              errorId: argumentException.Source,
+                                              errorCategory: ErrorCategory.InvalidArgument,
+                                              targetObject: this);
+            ThrowTerminatingError(errorRecord);
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException invalidException)
         {
-            ThrowTerminatingError(new ErrorRecord(e, e.Source, ErrorCategory.InvalidOperation, this));
+            var errorRecord = new ErrorRecord(invalidException,
+                                              errorId: invalidException.Source,
+                                              errorCategory: ErrorCategory.InvalidOperation,
+                                              targetObject: this);
+            ThrowTerminatingError(errorRecord);
         }
     }
 
     protected override void ProcessRecord()
     {
         BarWorker.UpdateRecord(this);
-        BarWorker.WriteProgress(this);
+        BarWorker.WriteProgress();
         if (EmitItem)
         {
             WriteObject(InputObject);
@@ -115,6 +140,13 @@ public sealed class WriteProgressPlusCommand : ProgressBase
 
     protected override void EndProcessing()
     {
+        // If user requested to keep state, we won't be removing anything
+        // Also applies to pipeline mode
+        if (KeepState.IsPresent)
+        {
+            return;
+        }
+        // In pipeline mode, we want to complete the bar and remove it at the end
         if (PipelineMode)
         {
             RemoveProgressInner(ID);
