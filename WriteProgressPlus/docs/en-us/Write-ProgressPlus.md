@@ -34,14 +34,14 @@ Works similarly to Write-Progress, but automates many things, including:
 
 ### Example 1
 ```powershell
-PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -Seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
 
 ### Example 2
 ```powershell
-PS C:\>1..100 | Write-ProgressPlus -TotalCount 100 | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | Write-ProgressPlus -TotalCount 100 | % {Start-Sleep -Seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
@@ -50,7 +50,7 @@ Percentage of completion will be displayed, as well as estimated time to complet
 
 ### Example 3
 ```powershell
-PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties Hour, Minute, Second -DisplayPropertiesSeparator ":" | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties Hour, Minute, Second -DisplayPropertiesSeparator ":" | % {Start-Sleep -Seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
@@ -61,7 +61,7 @@ Percentage of completion will be displayed, as well as estimated time to complet
 
 ### Example 4
 ```powershell
-PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties *second | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | % {get-date} | Write-ProgressPlus -TotalCount 100 -DisplayProperties *second | % {Start-Sleep -Seconds 1}
 ```
 
 Will display a progress which will update 100 times, displaying number of iterations passed.
@@ -72,7 +72,7 @@ Percentage of completion will be displayed, as well as estimated time to complet
 
 ### Example 5
 ```powershell
-PS C:\>100..300 | Write-ProgressPlus -TotalCount 200 -DisplayScript {[math]::sqrt($_)} | % {Start-Sleep -seconds 1}
+PS C:\>100..300 | Write-ProgressPlus -TotalCount 200 -DisplayScript {[math]::sqrt($_)} | % {Start-Sleep -Seconds 1}
 ```
 
 Will display a progress bar which will update 200 times, displaying number of iterations passed.
@@ -107,8 +107,8 @@ If Reset-ProgressPlus is not called, subsequent calls to this bar ID will contin
 
 ### Example 8
 ```powershell
-PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
-PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -Seconds 1}
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -Seconds 1}
 ```
 
 Same progress bar as in Example 1, but two subsequent bars will appear. Both bars will start at its iteration counter at zero.
@@ -117,8 +117,8 @@ Reset-Progress is not needed, since pipeline mode takes care of cleanup.
 
 ### Example 9
 ```powershell
-PS C:\>1..100 | Write-ProgressPlus -KeepState | % {Start-Sleep -seconds 1}
-PS C:\>1..100 | Write-ProgressPlus -KeepState | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | Write-ProgressPlus -KeepState | % {Start-Sleep -Seconds 1}
+PS C:\>1..100 | Write-ProgressPlus -KeepState | % {Start-Sleep -Seconds 1}
 ```
 
 Same progress bar as in Example 8, but the bars will share the iteration counter (the second bar will end at 200)
@@ -128,7 +128,7 @@ Same progress bar as in Example 8, but the bars will share the iteration counter
 PS C:\>Write-Progress
 PS C:\>Write-Progress -KeepState
 PS C:\>Write-Progress -KeepState
-PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -seconds 1}
+PS C:\>1..100 | Write-ProgressPlus | % {Start-Sleep -Seconds 1}
 ```
 
 First 3 commands will increase the iteration count by 1, so the pipeline bar will start at iteration 3.
@@ -441,3 +441,4 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
+https://github.com/Pedrokostam/WriteProgressPlus/

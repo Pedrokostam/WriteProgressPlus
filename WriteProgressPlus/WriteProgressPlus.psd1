@@ -98,7 +98,7 @@
             Tags = @('Progress', 'ProgressBar', 'Write-Progress')
 
             # A URL to the license for this module.
-            # LicenseUri = 'License.txt'
+            LicenseUri = 'https://github.com/Pedrokostam/WriteProgressPlus/blob/main/LICENSE.txt'
 
             # A URL to the main website for this project.
             ProjectUri = 'https://github.com/Pedrokostam/WriteProgressPlus'
@@ -107,7 +107,7 @@
             # IconUri = ''
 
             # ReleaseNotes of this module
-            # ReleaseNotes = ''
+            ReleaseNotes = 'https://github.com/Pedrokostam/WriteProgressPlus/blob/master/CHANGELOG.md'
 
             # Prerelease string of this module
             # Prerelease = ''

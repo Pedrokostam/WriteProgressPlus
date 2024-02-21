@@ -92,3 +92,4 @@ IDs of progress bars to be reset.
 ## NOTES
 
 ## RELATED LINKS
+https://github.com/Pedrokostam/WriteProgressPlus/
