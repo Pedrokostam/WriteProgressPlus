@@ -6,7 +6,7 @@ namespace WriteProgressPlus;
 [Cmdlet(VerbsCommunications.Write, "ProgressPlus")]
 [Alias("WriPro")]
 [CmdletBinding(PositionalBinding = false)]
-public sealed class WriteProgressPlusCommand : ProgressBase
+public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 {
     [Parameter()]
     [ValidateRange(0, int.MaxValue)]
@@ -77,7 +77,7 @@ public sealed class WriteProgressPlusCommand : ProgressBase
 
     public long HistoryId => MyInvocation.HistoryId;
 
-    private ProgressInner BarWorker { get; set; } = default!;
+    private ProgressState BarWorker { get; set; } = default!;
 
     protected override void BeginProcessing()
     {

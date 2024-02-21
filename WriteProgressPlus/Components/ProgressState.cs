@@ -4,20 +4,20 @@ using System.Management.Automation;
 using System.Text;
 using static System.Globalization.CultureInfo;
 namespace WriteProgressPlus.Components;
-public sealed class ProgressInner
+public sealed class ProgressState
 {
     private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
 
     private readonly string Placeholder = "placeholder";
 
-    public ProgressInner(WriteProgressPlusCommand donor)
+    public ProgressState(WriteProgressPlusCommand donor)
     {
         Id = donor.ID;
-        ParentId = donor.ParentID < ProgressBase.Offset ? -1 : donor.ParentID;
+        ParentId = donor.ParentID < ProgressBaseCommand.Offset ? -1 : donor.ParentID;
         Keeper = new TimeKeeper();
         AssociatedRecord = new(donor.ID, Placeholder, Placeholder);
         // try to reuse parentRuntime
-        ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBase.ProgressDict[ParentId].CmdRuntime : null;
+        ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBaseCommand.ProgressDict[ParentId].CmdRuntime : null;
         CmdRuntime = parentRuntime ?? donor.CommandRuntime;
         HistoryId = donor.HistoryId;
     }
@@ -134,7 +134,7 @@ public sealed class ProgressInner
         AssociatedRecord.RecordType = ProgressRecordType.Processing;
         AssociatedRecord.Activity = donor.Activity;
         AssociatedRecord.SecondsRemaining = remainingSeconds;
-        AssociatedRecord.ParentActivityId = donor.ParentID >= ProgressBase.Offset ? donor.ParentID : -1;
+        AssociatedRecord.ParentActivityId = donor.ParentID >= ProgressBaseCommand.Offset ? donor.ParentID : -1;
         AssociatedRecord.PercentComplete = percentage;
     }
 
@@ -232,7 +232,7 @@ public sealed class ProgressInner
     }
 
     /// <summary>
-    /// Makes ICommandRuntime associated with the ProgressInner call its WriteProgress
+    /// Makes ICommandRuntime associated with the ProgressState call its WriteProgress
     /// </summary>
     public void WriteProgress()
     {
@@ -240,7 +240,6 @@ public sealed class ProgressInner
         {
             return;
         }
-        Debug.WriteLine("cmdruntime");
         CmdRuntime?.WriteProgress(AssociatedRecord);
     }
 }

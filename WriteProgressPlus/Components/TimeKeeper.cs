@@ -51,7 +51,6 @@ internal class TimeKeeper
     public bool ShouldDisplay()
     {
         TimeSpan timePassed = DateTime.Now - LastDisplayed;
-        Debug.WriteLine(timePassed.TotalMilliseconds);
         if (timePassed <= UpdatePeriod)
         {
             return false;

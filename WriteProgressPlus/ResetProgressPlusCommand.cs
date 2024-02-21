@@ -6,7 +6,7 @@ namespace WriteProgressPlus;
 [OutputType(typeof(void))]
 [Alias("ResPro")]
 [CmdletBinding(PositionalBinding = true, DefaultParameterSetName = "NORMAL")]
-public sealed class ResetProgressPlusCommand : ProgressBase
+public sealed class ResetProgressPlusCommand : ProgressBaseCommand
 {
     [Parameter(Position=0,ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName ="NORMAL")]
     public int[]? ID { get; set; }

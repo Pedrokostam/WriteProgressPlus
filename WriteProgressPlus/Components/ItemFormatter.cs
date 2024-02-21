@@ -16,6 +16,7 @@ public partial class ItemFormatter
 
     public string PropertiesSeparator { get; set; } = DefaultSeparator;
 
+    // Saves given values inside this instance, so that they can be used when formatting a future item.
     public void Update(ScriptBlock? script, string[]? props, string? sep)
     {
         if (script is null)
@@ -57,6 +58,7 @@ public partial class ItemFormatter
             return null;
         }
 
+        // Script has priority
         if (Script is not null)
         {
             return Script.InvokeReturnAsIs(objects)?.ToString();
@@ -73,17 +75,23 @@ public partial class ItemFormatter
         }
     }
 
-    private string? GetFormattedProperties(object firstObject)
+    /// <summary>
+    /// Return a string made of values of selected <see cref="Properties"/>, concatenated with <see cref="PropertiesSeparator"/>.
+    /// If no property was selected, returns null.
+    /// </summary>
+    /// <param name="objectToFormat"></param>
+    /// <returns>String of property values or null</returns>
+    private string? GetFormattedProperties(object objectToFormat)
     {
         // items from pipeline will actually be PSObjects
         // only specifying it as -InputObject will give the raw object
-        if (firstObject is PSObject pso)
+        if (objectToFormat is PSObject pso)
         {
             GetPropertyOfPsObject(pso);
         }
         else
         {
-            GetPropertyOfNormalObject(firstObject);
+            GetPropertyOfNormalObject(objectToFormat);
         }
 
         if (Components.Count == 0)
@@ -94,6 +102,11 @@ public partial class ItemFormatter
         return string.Join(PropertiesSeparator, Components);
     }
 
+    /// <summary>
+    /// Given a PSObject, selects properties matching given pattern (possible with wildcards).
+    /// Fills <see cref="Components"/> with matching properties' values.
+    /// </summary>
+    /// <param name="pso"></param>
     void GetPropertyOfPsObject(PSObject pso)
     {
         // Uses PSObject's built in Match method for handling wildcards
@@ -110,8 +123,18 @@ public partial class ItemFormatter
         }
     }
 
+    /// <summary>
+    /// Given a non-PSObject, goes through each of its properties
+    /// and selects those matching given pattern (possible with wildcards).
+    /// Fills <see cref="Components"/> with matching properties' values.
+    /// </summary>
+    /// <param name="obj"></param>
     void GetPropertyOfNormalObject(object obj)
     {
+        if(obj is PSObject)
+        {
+            throw new InvalidOperationException($"Method {nameof(GetPropertyOfNormalObject)} cannot be used on a PSObject");
+        }
         Type t = obj.GetType();
         var allProperties = t.GetProperties();
         foreach (string propertyName in Properties!)
@@ -132,6 +155,13 @@ public partial class ItemFormatter
         }
     }
 
+    /// <summary>
+    /// Given a non-wildcard pattern compares each property's name to the pattern (case insensitive).
+    /// If the property matches, its value is added to <see cref="Components"/>
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="allProperties"></param>
+    /// <param name="name"></param>
     private void MatchNormalProp(object obj, PropertyInfo[] allProperties, string name)
     {
         foreach (var property in allProperties)
@@ -143,18 +173,24 @@ public partial class ItemFormatter
         }
     }
 
-    private void MatchNormapProp_Wild(object obj, PropertyInfo[] allProperties, string pattern)
+    /// <summary>
+    /// Uses the given pattern as a case-insensitive regex pattern and applies it to each property.
+    /// If the property matches, its value is added to <see cref="Components"/>
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="allProperties"></param>
+    /// <param name="regexPattern">Valid regex pattern</param>
+    private void MatchNormapProp_Wild(object obj, PropertyInfo[] allProperties, string regexPattern)
     {
         foreach (var property in allProperties)
         {
-            if (Regex.IsMatch(property.Name, pattern, RegexOptions.IgnoreCase, RegexTimeout))
+            if (Regex.IsMatch(property.Name, regexPattern, RegexOptions.IgnoreCase, RegexTimeout))
             {
                 Components.Add(property.GetValue(obj));
             }
         }
     }
 
-    private readonly static MatchEvaluator AliasReplacer = new(ReplaceAlias);
 
     /// <summary>
     /// There are 3 possible wildcard: *, ?, []. The brackets can be left as they are, because they regex-compliant
@@ -165,6 +201,8 @@ public partial class ItemFormatter
     private readonly static Regex AliasDetector = new(@"\$(?<alias>[_ctpCTP])", RegexOptions.Compiled, RegexTimeout);
 
     private readonly static MatchEvaluator Evaluator = new(ReplaceWildcard);
+
+    private readonly static MatchEvaluator AliasReplacer = new(ReplaceAlias);
 
     private static string ReplaceAlias(Match match)
     {
