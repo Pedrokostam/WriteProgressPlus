@@ -75,12 +75,23 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 
     private bool EmitItem { get; set; }
 
-    public long HistoryId => MyInvocation.HistoryId;
+    internal long HistoryId => MyInvocation.HistoryId;
 
     private ProgressState BarWorker { get; set; } = default!;
 
     protected override void BeginProcessing()
     {
+        if (ID == ParentID)
+        {
+            var errorRecord = new ErrorRecord(
+                new IdConflictException(),
+                "ParentIdSameAsId",
+                ErrorCategory.InvalidArgument,
+                this
+                );
+            ThrowTerminatingError(errorRecord);
+        }
+
         ID += Offset;
         ParentID += Offset;
 
@@ -99,13 +110,21 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
         {
             BarWorker = GetProgressInner(this);
         }
-        catch (ArgumentException e)
+        catch (ArgumentException argumentException)
         {
-            ThrowTerminatingError(new ErrorRecord(e, e.Source, ErrorCategory.InvalidArgument, this));
+            var errorRecord = new ErrorRecord(argumentException,
+                                              errorId: argumentException.Source,
+                                              errorCategory: ErrorCategory.InvalidArgument,
+                                              targetObject: this);
+            ThrowTerminatingError(errorRecord);
         }
-        catch (InvalidOperationException e)
+        catch (InvalidOperationException invalidException)
         {
-            ThrowTerminatingError(new ErrorRecord(e, e.Source, ErrorCategory.InvalidOperation, this));
+            var errorRecord = new ErrorRecord(invalidException,
+                                              errorId: invalidException.Source,
+                                              errorCategory: ErrorCategory.InvalidOperation,
+                                              targetObject: this);
+            ThrowTerminatingError(errorRecord);
         }
     }
 
@@ -121,6 +140,13 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 
     protected override void EndProcessing()
     {
+        // If user requested to keep state, we won't be removing anything
+        // Also applies to pipeline mode
+        if (KeepState.IsPresent)
+        {
+            return;
+        }
+        // In pipeline mode, we want to complete the bar and remove it at the end
         if (PipelineMode)
         {
             RemoveProgressInner(ID);
