@@ -352,6 +352,23 @@ Accept pipeline input: False
 Accept wildcard characters: False
 ```
 
+### -KeepState
+If specified, progress bar status will be preserved across different commands (the ones listed in Get-History).
+
+By default, the state is removed when the calling instance is from a different command - this parameter can prevent that.
+
+```yaml
+Type: SwitchParameter
+Parameter Sets: (All)
+Aliases: Persist
+
+Required: False
+Position: Named
+Default value: false
+Accept pipeline input: False
+Accept wildcard characters: False
+```
+
 ### -PassThru
 if specified, will emit the input object.
 

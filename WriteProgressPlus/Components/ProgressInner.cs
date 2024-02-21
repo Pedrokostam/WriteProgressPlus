@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Management.Automation;
 using System.Text;
 using static System.Globalization.CultureInfo;
@@ -197,14 +198,22 @@ public sealed class ProgressInner
 
     public void WriteProgress(Cmdlet? parent)
     {
-        if (!ShouldDisplay()) return;
-
-        if (parent?.CommandRuntime == CmdRuntime)
+        // TODO: Is there a reason to use parent's Runtime? CmdRuntime should either be parent or the proper one anyway
+        if (!ShouldDisplay())
         {
+            return;
+        }
+
+        Debug.WriteLine("will display");
+        if (parent?.CommandRuntime == CmdRuntime
+            )
+        {
+            Debug.WriteLine("parent");
             parent.WriteProgress(AssociatedRecord);
         }
         else
         {
+            Debug.WriteLine("cmdruntime");
             CmdRuntime?.WriteProgress(AssociatedRecord);
         }
     }

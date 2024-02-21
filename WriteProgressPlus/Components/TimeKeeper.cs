@@ -1,4 +1,7 @@
-﻿namespace WriteProgressPlus.Components;
+﻿using System.Diagnostics;
+using System.Management.Automation;
+
+namespace WriteProgressPlus.Components;
 
 internal class TimeKeeper
 {
@@ -22,7 +25,7 @@ internal class TimeKeeper
         StartTime = DateTime.Now;
         Buffer = new(calculationLength);
         // Make sure the first iteration can be displayed
-        LastDisplayed = StartTime - UpdatePeriod.Multiply(5); 
+        LastDisplayed = StartTime - UpdatePeriod.Multiply(5);
     }
 
     public TimeKeeper() : this(CalculationLength)
@@ -43,12 +46,19 @@ internal class TimeKeeper
     /// <returns></returns>
     public bool ShouldDisplay()
     {
+        //// if instance is null, the progress bar is being deleted
+        //// in that case do not set last time
+        //// as it may prevent next call to wripro
+        //if (instance is  null)
+        //{
+        //    return true;
+        //}
         TimeSpan timePassed = DateTime.Now - LastDisplayed;
+        Debug.WriteLine(timePassed.TotalMilliseconds);
         if (timePassed <= UpdatePeriod)
         {
             return false;
         }
-
         LastDisplayed = DateTime.Now;
         return true;
     }

@@ -13,12 +13,15 @@ public class ProgressBase : PSCmdlet
         {
             if (current.KeepState.IsPresent || pi.HistoryId == current.HistoryId)
             {
-                // If the history ids match, or if user requested state keeping return the existing state
+                // If the history ids match, or if user requested state keeping, return the existing state
                 return pi;
             }
             else // HistoryId is different and user does not want to keep state
             {
-                RemoveProgressInner(current.ID);
+                // Do not write the comlete bar - due to pwsh7 throttling the complete update of bar
+                // will make the new bar not display
+                // From powershell point of view the bar never went away, just changed activity, etc...
+                RemoveProgressInner(current.ID, false);
                 return AddNewProgressInner(current);
             }
         }
@@ -34,21 +37,30 @@ public class ProgressBase : PSCmdlet
         ProgressDict.Add(current.ID, p);
         return p;
     }
-
     public static bool RemoveProgressInner(int id)
     {
-        if (ProgressDict.TryGetValue(id, out ProgressInner? progressInner))
+        return RemoveProgressInner(id, true);
+    }
+    private static bool RemoveProgressInner(int id, bool writeCompleted)
+    {
+        if (!ProgressDict.TryGetValue(id, out ProgressInner? progressInner))
         {
+            return false;
+        }
+        if (writeCompleted)
+        {
+            // Set recordtype to completed
+            // DOn't know if it does something though, might want to test it
+            // TODO: Check if RecordType being completed does anything
             progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
             progressInner.AssociatedRecord.PercentComplete = 100;
             progressInner.WriteProgress(null);
-#if DEBUG
-            progressInner?.CmdRuntime?.WriteDebug(Invariant($"Removed state for progress bar {id - Offset}"));
-#endif
-            ProgressDict.Remove(id);
-            return true;
         }
-        return false;
+#if DEBUG
+        progressInner.CmdRuntime?.WriteDebug(Invariant($"Removed state for progress bar {id - Offset}"));
+#endif
+        ProgressDict.Remove(id);
+        return true;
     }
 
     public void ClearProgressInners()
