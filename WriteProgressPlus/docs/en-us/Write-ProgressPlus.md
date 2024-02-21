@@ -398,7 +398,7 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## OUTPUTS
 
 ### System.Object
-	If -PassThru is true, the input object is outputted, otherwise nothing is.
+	If -PassThru is true (or used in the middle of a pipeline), the input object is outputted, otherwise nothing is.
 
 ## NOTES
 

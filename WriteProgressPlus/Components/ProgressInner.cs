@@ -55,23 +55,37 @@ public sealed class ProgressInner
     /// <param name="donor">Currently called instance of <see cref="WriteProgressPlusCommand"/></param>
     public void StartNewIteration(WriteProgressPlusCommand donor)
     {
-        if (donor.CurrentIteration > 0)
-            ActualCurrentIteration = donor.CurrentIteration;
-        else
-            ActualCurrentIteration += donor.Increment;
+        ActualCurrentIteration = donor.CurrentIteration switch
+        {
+            // Non-negative iteration means it was specified by user
+            >= 0 => donor.CurrentIteration,
+            // Negative iteration means we need to calculate it from increment
+            _ => ActualCurrentIteration + donor.Increment,
+        };
         Keeper.AddTime();
     }
 
     /// <summary>
-    /// Single stringbuilder to avoid making more objects. Used to create status message.
+    /// Single StringBuilder to avoid making more objects. Used to create status message.
     /// </summary>
     private StringBuilder StatusBuilder { get; } = new StringBuilder();
 
+    /// <summary>
+    /// Calculates remaining time to completion based on total count and average time per iteration.
+    /// </summary>
+    /// <param name="totalCount">
+    ///     How many iterations in total wil happen.
+    ///     <para/>If it is less than <see cref="ActualCurrentIteration"/> calculations are disabled.
+    /// </param>
+    /// <returns>TimeSpan with calculated time, or TimeSpan of negative 1 second if calculation is disabled.</returns>
     public TimeSpan GetRemainingTime(int totalCount)
     {
-        int left = totalCount - ActualCurrentIteration;
-        if (left < 0) return Negative;
-        return Keeper.GetAverage().Multiply(left);
+        int iterationsLeft = totalCount - ActualCurrentIteration;
+        return iterationsLeft switch
+        {
+            < 0 => Negative, // iterations exceeded total count, cannot calculate
+            _ => Keeper.GetAverage().Multiply(iterationsLeft),
+        };
     }
 
     /// <inheritdoc cref="TimeKeeper.ShouldDisplay"/>
@@ -111,6 +125,11 @@ public sealed class ProgressInner
         AppendCounter(donor);
         AppendPercentage(donor, percentage, overflow);
         int remainingSeconds = GetRemainingSeconds(donor);
+        UpdateAssociatedRecord(donor, percentage, remainingSeconds);
+    }
+
+    private void UpdateAssociatedRecord(WriteProgressPlusCommand donor, int percentage, int remainingSeconds)
+    {
         AssociatedRecord.StatusDescription = StatusBuilder.ToString();
         AssociatedRecord.RecordType = ProgressRecordType.Processing;
         AssociatedRecord.Activity = donor.Activity;
@@ -119,6 +138,22 @@ public sealed class ProgressInner
         AssociatedRecord.PercentComplete = percentage;
     }
 
+    /// <summary>
+    /// Appends percent done: {d2}% or [Incorrect total count] depending on overflow.
+    /// <para/>
+    /// Skips if donor has at least one of the following:
+    /// <list type="bullet">
+    ///     <item>
+    ///         Negative <see cref="WriteProgressPlusCommand.TotalCount"/>
+    ///     </item>
+    ///     <item>
+    ///         Present <see cref="WriteProgressPlusCommand.NoPercentage"/>
+    ///     </item>
+    /// </list>
+    /// </summary>
+    /// <param name="donor"></param>
+    /// <param name="percentage"></param>
+    /// <param name="overflow"></param>
     private void AppendPercentage(WriteProgressPlusCommand donor, int percentage, bool overflow)
     {
         if (donor.TotalCount <= 0 || donor.NoPercentage)
@@ -196,6 +231,9 @@ public sealed class ProgressInner
         return remainingSeconds;
     }
 
+    /// <summary>
+    /// Makes ICommandRuntime associated with the ProgressInner call its WriteProgress
+    /// </summary>
     public void WriteProgress()
     {
         if (!ShouldDisplay())

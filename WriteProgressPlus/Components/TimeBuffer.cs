@@ -1,12 +1,14 @@
 ﻿namespace WriteProgressPlus.Components;
 
+/// <summary>
+/// Simple implementation of a circular buffer.
+/// Stores recent TimeSpans and can calculate moving average.
+/// </summary>
 class TimeBuffer
 {
     private readonly TimeSpan[] timeSpans;
 
     private DateTime LastDataPoint = DateTime.MinValue;
-
-    public int CurrentLength { get; private set; }
 
     public int MaxLength { get; }
 

@@ -3,6 +3,9 @@ using System.Management.Automation;
 
 namespace WriteProgressPlus.Components;
 
+/// <summary>
+/// Controls how often a progress bar can update, keeps track of iteration times and calculates ETA.
+/// </summary>
 internal class TimeKeeper
 {
     /// <summary>
@@ -10,6 +13,9 @@ internal class TimeKeeper
     /// </summary>
     public static readonly TimeSpan UpdatePeriod = TimeSpan.FromMilliseconds(100);
 
+    /// <summary>
+    /// How many elements should be considered when calculating ETA
+    /// </summary>
     public const int CalculationLength = 50;
 
     public DateTime StartTime { get; }
@@ -18,9 +24,7 @@ internal class TimeKeeper
 
     private TimeBuffer Buffer { get; }
 
-    public int DatapointCount => Buffer.CurrentLength;
-
-    public TimeKeeper(int calculationLength)
+    private TimeKeeper(int calculationLength)
     {
         StartTime = DateTime.Now;
         Buffer = new(calculationLength);
@@ -46,13 +50,6 @@ internal class TimeKeeper
     /// <returns></returns>
     public bool ShouldDisplay()
     {
-        //// if instance is null, the progress bar is being deleted
-        //// in that case do not set last time
-        //// as it may prevent next call to wripro
-        //if (instance is  null)
-        //{
-        //    return true;
-        //}
         TimeSpan timePassed = DateTime.Now - LastDisplayed;
         Debug.WriteLine(timePassed.TotalMilliseconds);
         if (timePassed <= UpdatePeriod)

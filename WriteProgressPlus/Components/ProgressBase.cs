@@ -38,7 +38,16 @@ public class ProgressBase : PSCmdlet
         ProgressDict.Add(current.ID, p);
         return p;
     }
-    public static bool RemoveProgressInner(int id) => RemoveProgressInner(id, true);
+
+    /// <summary>
+    /// Removes progress bar state associated with the given id. Does nothing if id is not associated with anything.
+    /// <para/>
+    /// If state is removed, its bar will be updated once with RecordType set to complete.
+    /// </summary>
+    /// <param name="id">ID of ProgressInner</param>
+    /// <returns></returns>
+    public static bool RemoveProgressInner(int id) => RemoveProgressInner(id, writeCompleted: true);
+
     private static bool RemoveProgressInner(int id, bool writeCompleted)
     {
         if (!ProgressDict.TryGetValue(id, out ProgressInner? progressInner))
@@ -49,7 +58,7 @@ public class ProgressBase : PSCmdlet
         {
             // Set recordtype to completed
             // According to documentation, each bar should be written once with RecordType set to Completed
-            // Tihs ensures that the bar will be removed
+            // This ensures that the bar will be removed
             progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
             progressInner.AssociatedRecord.PercentComplete = 100;
             progressInner.WriteProgress();
@@ -62,6 +71,9 @@ public class ProgressBase : PSCmdlet
         return true;
     }
 
+    /// <summary>
+    /// Removes all progress bar states
+    /// </summary>
     public void ClearProgressInners()
     {
         var keys = ProgressDict.Keys.ToArray();
