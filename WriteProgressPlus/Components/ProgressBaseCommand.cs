@@ -52,12 +52,18 @@ public class ProgressBaseCommand : PSCmdlet
     /// <summary>
     /// Removes progress bar state associated with the given id. Does nothing if id is not associated with anything.
     /// <para/>
-    /// If state is removed, its bar will be updated once with RecordType set to complete.
+    /// If state is removed, its bar will be updated once with RecordType set to complete to clear it.
+    /// </summary>
+    /// <inheritdoc cref="RemoveProgressInner(int, bool)"/>
+    public static bool RemoveProgressInner(int id) => RemoveProgressInner(id, writeCompleted: true);
+
+    /// <summary>
+    /// Removes progress bar state associated with the given id. Does nothing if id is not associated with anything.
+    /// <para/>
+    /// If state is removed and <paramref name="writeCompleted"/> is <see langword="true"/>, its bar will be updated once with RecordType set to complete to clear it.
     /// </summary>
     /// <param name="id">ID of ProgressState</param>
     /// <returns></returns>
-    public static bool RemoveProgressInner(int id) => RemoveProgressInner(id, writeCompleted: true);
-
     private static bool RemoveProgressInner(int id, bool writeCompleted)
     {
         if (!ProgressDict.TryGetValue(id, out ProgressState? progressInner))
@@ -71,7 +77,7 @@ public class ProgressBaseCommand : PSCmdlet
             // This ensures that the bar will be removed
             progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
             progressInner.AssociatedRecord.PercentComplete = 100;
-            progressInner.WriteProgress();
+            progressInner.WriteProgress(force: true);
             // However, if the state is being removed, because a new bar from different command is requested
             // We should not complete it - the bar should be reused
             // Thus we skip this section altogether if writeCompleted is false

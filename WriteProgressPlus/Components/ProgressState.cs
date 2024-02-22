@@ -232,14 +232,14 @@ public sealed class ProgressState
     }
 
     /// <summary>
-    /// Makes ICommandRuntime associated with the ProgressState call its WriteProgress
+    /// Makes ICommandRuntime associated with the ProgressState call its WriteProgress.
+    /// Can be skipped by throttling, unless <paramref name="force"/> is <see langword="true"/>
     /// </summary>
-    public void WriteProgress()
+    public void WriteProgress(bool force = false)
     {
-        if (!ShouldDisplay())
+        if (force || ShouldDisplay())
         {
-            return;
+            CmdRuntime?.WriteProgress(AssociatedRecord);
         }
-        CmdRuntime?.WriteProgress(AssociatedRecord);
     }
 }
