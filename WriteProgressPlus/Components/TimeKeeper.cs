@@ -6,9 +6,15 @@
 internal class TimeKeeper
 {
     /// <summary>
-    /// Minimum time between updates of progress bar. 
+    /// Minimum time between updates of progress bar.
+    /// <para/>
+    /// Set to the same values as in <see href="https://github.com/PowerShell/PowerShell/pull/2822">PR #2822</see> - 200ms
     /// </summary>
-    public static readonly TimeSpan UpdatePeriod = TimeSpan.FromMilliseconds(100);
+    /// <remarks>
+    /// More information can be found at
+    /// <seealso cref="PowershellVersionDifferences.IsThrottlingBuiltIn"/>.
+    /// </remarks>
+    public static readonly TimeSpan UpdatePeriod = TimeSpan.FromMilliseconds(200);
 
     /// <summary>
     /// How many elements should be considered when calculating ETA
@@ -41,11 +47,9 @@ internal class TimeKeeper
     /// <summary>
     /// Ensure that the progress bar won't be updated too often, which reduces performance.
     /// Updates that come too fast should be ignored.
-    /// <para/>
-    /// Powershell 7 onwards has this behavior built in.
     /// </summary>
     /// <returns></returns>
-    public bool ShouldDisplay()
+    public bool UpdatedPermitted()
     {
         TimeSpan timePassed = DateTime.Now - LastDisplayed;
         if (timePassed <= UpdatePeriod)

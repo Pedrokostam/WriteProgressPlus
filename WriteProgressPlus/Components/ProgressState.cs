@@ -1,6 +1,7 @@
 ﻿using System.Management.Automation;
 using System.Text;
 using static System.Globalization.CultureInfo;
+using static WriteProgressPlus.Components.PowershellVersionDifferences;
 
 namespace WriteProgressPlus.Components;
 
@@ -88,8 +89,15 @@ public sealed class ProgressState
         };
     }
 
-    /// <inheritdoc cref="TimeKeeper.ShouldDisplay"/>
-    public bool ShouldDisplay() => Keeper.ShouldDisplay();
+    public bool ShouldUpdate()
+    {
+        if (IsThrottlingBuiltIn(CmdRuntime))
+        {
+            // The updates may be very frequent, but the built-in throttling will handle it.
+            return true;
+        }
+        return Keeper.UpdatedPermitted();
+    }
 
     /// <summary>
     /// Calculate percent done using donor's TotalCount and <see cref="ActualCurrentIteration"/>.
@@ -237,7 +245,7 @@ public sealed class ProgressState
     /// </summary>
     public void WriteProgress(bool force = false)
     {
-        if (force || ShouldDisplay())
+        if (force || ShouldUpdate())
         {
             CmdRuntime?.WriteProgress(AssociatedRecord);
         }
