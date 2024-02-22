@@ -18,25 +18,18 @@ internal class TimeKeeper
     /// </remarks>
     public static readonly long UpdatePeriodTicks = 2_000_000; // tick is 100ns => 200ms
 
-    /// <summary>
-    /// How many elements should be considered when calculating ETA
-    /// </summary>
-    public const int CalculationLength = 50;
-
     public long LastDisplayTimeTicks { get; set; }
 
     private TimeBuffer Buffer { get; }
 
-    private TimeKeeper(int calculationLength)
+    public TimeKeeper(int calculationLength)
     {
-        Buffer = new(calculationLength);
+        Buffer = new TimeBuffer(calculationLength);
         // Make sure the first iteration can be displayed
         // .UtcNow is about 3 times faster than .Now
         LastDisplayTimeTicks = DateTime.UtcNow.Ticks - UpdatePeriodTicks * 5;
     }
 
-    public TimeKeeper() : this(CalculationLength)
-    { }
 
     /// <inheritdoc cref="TimeBuffer.AddTime()"/>
     public void AddTime() => Buffer.AddTime();

@@ -6,6 +6,16 @@
 /// </summary>
 class TimeBuffer
 {
+    /// <summary>
+    /// Upper limit to avoid having too large buffers.
+    /// </summary>
+    public static readonly int MaxCalculationLength = 5000;
+
+    /// <summary>
+    /// Lower limit to avoid having too large buffers.
+    /// </summary>
+    public static readonly int MinCalculationLength = 50;
+
     private readonly TimeSpan[] timeSpans;
 
     private DateTime LastDataPoint = DateTime.MinValue;
@@ -24,7 +34,7 @@ class TimeBuffer
 
     public TimeBuffer(int calculationLength)
     {
-        MaxLength = calculationLength > 0 ? calculationLength : 1;
+        MaxLength = Math.Min(Math.Max(MinCalculationLength, calculationLength), MaxCalculationLength);
         timeSpans = new TimeSpan[MaxLength];
     }
     /// <summary>

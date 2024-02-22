@@ -15,11 +15,17 @@ internal sealed class ProgressState
     {
         Id = donor.ID;
         ParentId = donor.ParentID < ProgressBaseCommand.Offset ? -1 : donor.ParentID;
-        Keeper = new TimeKeeper();
-        AssociatedRecord = new(donor.ID, Placeholder, Placeholder);
+
+        // Let the calculation length about 1/20 of the total length, still subject to minimum, maximum and calculation lengths in  Buffer
+        int timeCalculationLength = donor.TotalCount / 20;
+        Keeper = new TimeKeeper(timeCalculationLength);
+
+        AssociatedRecord = new ProgressRecord(donor.ID, Placeholder, Placeholder);
+
         // try to reuse parentRuntime
         ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBaseCommand.ProgressDict[ParentId].CmdRuntime : null;
         CmdRuntime = parentRuntime ?? donor.CommandRuntime;
+
         HistoryId = donor.HistoryId;
     }
 
