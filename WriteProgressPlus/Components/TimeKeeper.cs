@@ -1,4 +1,6 @@
-﻿namespace WriteProgressPlus.Components;
+﻿
+
+namespace WriteProgressPlus.Components;
 
 /// <summary>
 /// Controls how often a progress bar can update, keeps track of iteration times and calculates ETA.
@@ -14,25 +16,23 @@ internal class TimeKeeper
     /// More information can be found at
     /// <seealso cref="PowershellVersionDifferences.IsThrottlingBuiltIn"/>.
     /// </remarks>
-    public static readonly TimeSpan UpdatePeriod = TimeSpan.FromMilliseconds(200);
+    public static readonly long UpdatePeriodTicks = 2_000_000; // tick is 100ns => 200ms
 
     /// <summary>
     /// How many elements should be considered when calculating ETA
     /// </summary>
     public const int CalculationLength = 50;
 
-    public DateTime StartTime { get; }
-
-    public DateTime LastDisplayed { get; set; }
+    public long LastDisplayTimeTicks { get; set; }
 
     private TimeBuffer Buffer { get; }
 
     private TimeKeeper(int calculationLength)
     {
-        StartTime = DateTime.Now;
         Buffer = new(calculationLength);
         // Make sure the first iteration can be displayed
-        LastDisplayed = StartTime - UpdatePeriod.Multiply(5);
+        // .UtcNow is about 3 times faster than .Now
+        LastDisplayTimeTicks = DateTime.UtcNow.Ticks - UpdatePeriodTicks * 5;
     }
 
     public TimeKeeper() : this(CalculationLength)
@@ -51,12 +51,13 @@ internal class TimeKeeper
     /// <returns></returns>
     public bool UpdatedPermitted()
     {
-        TimeSpan timePassed = DateTime.Now - LastDisplayed;
-        if (timePassed <= UpdatePeriod)
+        long currentTicks = DateTime.UtcNow.Ticks;
+        long ticksPassed = currentTicks - LastDisplayTimeTicks;
+        if (ticksPassed <= UpdatePeriodTicks)
         {
             return false;
         }
-        LastDisplayed = DateTime.Now;
+        LastDisplayTimeTicks = currentTicks;
         return true;
     }
 }
