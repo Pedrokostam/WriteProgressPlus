@@ -441,4 +441,4 @@ This cmdlet supports the common parameters: -Debug, -ErrorAction, -ErrorVariable
 ## NOTES
 
 ## RELATED LINKS
-https://github.com/Pedrokostam/WriteProgressPlus/
+[Project repository](https://github.com/Pedrokostam/WriteProgressPlus/)
