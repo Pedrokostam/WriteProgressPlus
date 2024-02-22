@@ -110,7 +110,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
         Formatter.Update(DisplayScript, DisplayProperties, DisplayPropertiesSeparator);
         try
         {
-            BarWorker = GetProgressInner(this);
+            BarWorker = GetProgressState(this);
         }
         catch (ArgumentException argumentException)
         {

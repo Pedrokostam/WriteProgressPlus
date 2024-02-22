@@ -18,14 +18,14 @@ public class ProgressBaseCommand : PSCmdlet
     /// </summary>
     /// <param name="current"></param>
     /// <returns></returns>
-    public static ProgressState GetProgressInner(WriteProgressPlusCommand current)
+    public static ProgressState GetProgressState(WriteProgressPlusCommand current)
     {
-        if (ProgressDict.TryGetValue(current.ID, out ProgressState? existingProgressInner))
+        if (ProgressDict.TryGetValue(current.ID, out ProgressState? existingProgressState))
         {
-            if (current.KeepState.IsPresent || existingProgressInner.HistoryId == current.HistoryId)
+            if (current.KeepState.IsPresent || existingProgressState.HistoryId == current.HistoryId)
             {
                 // If the history ids match, or if user requested state keeping, return the existing state
-                return existingProgressInner;
+                return existingProgressState;
             }
             else // HistoryId is different and user does not want to keep state
             {
@@ -33,16 +33,16 @@ public class ProgressBaseCommand : PSCmdlet
                 // will make the new bar not display
                 // From powershell point of view the bar never went away, just changed activity, etc...
                 RemoveProgressState(current.ID, false);
-                return AddNewProgressInner(current);
+                return AddNewProgressState(current);
             }
         }
         else
         {
-            return AddNewProgressInner(current);
+            return AddNewProgressState(current);
         }
     }
 
-    private static ProgressState AddNewProgressInner(WriteProgressPlusCommand current)
+    private static ProgressState AddNewProgressState(WriteProgressPlusCommand current)
     {
         ProgressState p = new(current);
         ProgressDict.Add(current.ID, p);
@@ -66,7 +66,7 @@ public class ProgressBaseCommand : PSCmdlet
     /// <returns></returns>
     private static bool RemoveProgressState(int id, bool writeCompleted)
     {
-        if (!ProgressDict.TryGetValue(id, out ProgressState? progressInner))
+        if (!ProgressDict.TryGetValue(id, out ProgressState? progressState))
         {
             return false;
         }
@@ -75,14 +75,14 @@ public class ProgressBaseCommand : PSCmdlet
             // Set recordtype to completed
             // According to documentation, each bar should be written once with RecordType set to Completed
             // This ensures that the bar will be removed
-            progressInner.AssociatedRecord.RecordType = ProgressRecordType.Completed;
-            progressInner.AssociatedRecord.PercentComplete = 100;
-            progressInner.WriteProgress(force: true);
+            progressState.AssociatedRecord.RecordType = ProgressRecordType.Completed;
+            progressState.AssociatedRecord.PercentComplete = 100;
+            progressState.WriteProgress(force: true);
             // However, if the state is being removed, because a new bar from different command is requested
             // We should not complete it - the bar should be reused
             // Thus we skip this section altogether if writeCompleted is false
         }
-        Debug.WriteLine(Invariant($"Removed state for progress bar {id - Offset} (was {progressInner.ActualCurrentIteration} iteration)"));
+        Debug.WriteLine(Invariant($"Removed state for progress bar {id - Offset} (was {progressState.ActualCurrentIteration} iteration)"));
         ProgressDict.Remove(id);
         return true;
     }
