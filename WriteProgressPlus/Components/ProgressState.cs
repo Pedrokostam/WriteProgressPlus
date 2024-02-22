@@ -5,7 +5,7 @@ using static WriteProgressPlus.Components.PowershellVersionDifferences;
 
 namespace WriteProgressPlus.Components;
 
-public sealed class ProgressState
+internal sealed class ProgressState
 {
     private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
 

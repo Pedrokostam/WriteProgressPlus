@@ -1,13 +1,14 @@
 ﻿using System.Management.Automation;
 using System.Diagnostics;
 using WriteProgressPlus.Components;
+using static WriteProgressPlus.Components.PowershellVersionDifferences;
 
 namespace WriteProgressPlus;
 
 [Cmdlet(VerbsCommunications.Write, "ProgressPlus")]
 [Alias("WriPro")]
 [CmdletBinding(PositionalBinding = false)]
-public sealed class WriteProgressPlusCommand : ProgressBaseCommand
+public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicParameters
 {
     [Parameter]
     [ValidateRange(0, int.MaxValue)]
@@ -67,6 +68,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
 
     [Parameter]
     [Alias("Persist")]
+
     public SwitchParameter KeepState { get; set; }
 
     internal readonly ItemFormatter Formatter = new();
@@ -80,6 +82,10 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
     internal long HistoryId => MyInvocation.HistoryId;
 
     private ProgressState BarWorker { get; set; } = default!;
+
+    private NoThrottleDynamicParameter? NoThrottleDynamicParam { get; set; }
+
+    internal bool DisableThrottling => NoThrottleDynamicParam?.NoThrottle.IsPresent ?? false;
 
     protected override void BeginProcessing()
     {
@@ -133,7 +139,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
     protected override void ProcessRecord()
     {
         BarWorker.UpdateRecord(this);
-        BarWorker.WriteProgress();
+        BarWorker.WriteProgress(force: DisableThrottling);
         if (EmitItem)
         {
             WriteObject(InputObject);
@@ -156,4 +162,14 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
     }
 
     protected override void StopProcessing() => EndProcessing();
+
+    public object? GetDynamicParameters()
+    {
+        if (IsThrottlingBuiltIn(CommandRuntime))
+        {
+            return null;
+        }
+        NoThrottleDynamicParam = new NoThrottleDynamicParameter();
+        return NoThrottleDynamicParam;
+    }
 }

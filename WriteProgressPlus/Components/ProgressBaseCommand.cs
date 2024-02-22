@@ -18,7 +18,7 @@ public class ProgressBaseCommand : PSCmdlet
     /// </summary>
     /// <param name="current"></param>
     /// <returns></returns>
-    public static ProgressState GetProgressState(WriteProgressPlusCommand current)
+    internal static ProgressState GetProgressState(WriteProgressPlusCommand current)
     {
         if (ProgressDict.TryGetValue(current.ID, out ProgressState? existingProgressState))
         {
