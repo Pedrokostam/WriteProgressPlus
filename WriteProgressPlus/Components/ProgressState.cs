@@ -1,10 +1,11 @@
 ﻿using System.Management.Automation;
 using System.Text;
 using static System.Globalization.CultureInfo;
+using static WriteProgressPlus.Components.PowershellVersionDifferences;
 
 namespace WriteProgressPlus.Components;
 
-public sealed class ProgressState
+internal sealed class ProgressState
 {
     private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
 
@@ -14,11 +15,17 @@ public sealed class ProgressState
     {
         Id = donor.ID;
         ParentId = donor.ParentID < ProgressBaseCommand.Offset ? -1 : donor.ParentID;
-        Keeper = new TimeKeeper();
-        AssociatedRecord = new(donor.ID, Placeholder, Placeholder);
+
+        // Let the calculation length about 1/20 of the total length, still subject to minimum, maximum and calculation lengths in  Buffer
+        int timeCalculationLength = donor.TotalCount / 20;
+        Keeper = new TimeKeeper(timeCalculationLength);
+
+        AssociatedRecord = new ProgressRecord(donor.ID, Placeholder, Placeholder);
+
         // try to reuse parentRuntime
         ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBaseCommand.ProgressDict[ParentId].CmdRuntime : null;
         CmdRuntime = parentRuntime ?? donor.CommandRuntime;
+
         HistoryId = donor.HistoryId;
     }
 
@@ -88,8 +95,15 @@ public sealed class ProgressState
         };
     }
 
-    /// <inheritdoc cref="TimeKeeper.ShouldDisplay"/>
-    public bool ShouldDisplay() => Keeper.ShouldDisplay();
+    public bool ShouldUpdate()
+    {
+        if (IsThrottlingBuiltIn(CmdRuntime))
+        {
+            // The updates may be very frequent, but the built-in throttling will handle it.
+            return true;
+        }
+        return Keeper.UpdatedPermitted();
+    }
 
     /// <summary>
     /// Calculate percent done using donor's TotalCount and <see cref="ActualCurrentIteration"/>.
@@ -232,14 +246,14 @@ public sealed class ProgressState
     }
 
     /// <summary>
-    /// Makes ICommandRuntime associated with the ProgressState call its WriteProgress
+    /// Makes ICommandRuntime associated with the ProgressState call its WriteProgress.
+    /// Can be skipped by throttling, unless <paramref name="force"/> is <see langword="true"/>
     /// </summary>
-    public void WriteProgress()
+    public void WriteProgress(bool force = false)
     {
-        if (!ShouldDisplay())
+        if (force || ShouldUpdate())
         {
-            return;
+            CmdRuntime?.WriteProgress(AssociatedRecord);
         }
-        CmdRuntime?.WriteProgress(AssociatedRecord);
     }
 }

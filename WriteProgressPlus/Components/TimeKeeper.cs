@@ -1,4 +1,6 @@
-﻿namespace WriteProgressPlus.Components;
+﻿
+
+namespace WriteProgressPlus.Components;
 
 /// <summary>
 /// Controls how often a progress bar can update, keeps track of iteration times and calculates ETA.
@@ -6,31 +8,28 @@
 internal class TimeKeeper
 {
     /// <summary>
-    /// Minimum time between updates of progress bar. 
+    /// Minimum time between updates of progress bar.
+    /// <para/>
+    /// Set to the same values as in <see href="https://github.com/PowerShell/PowerShell/pull/2822">PR #2822</see> - 200ms
     /// </summary>
-    public static readonly TimeSpan UpdatePeriod = TimeSpan.FromMilliseconds(100);
+    /// <remarks>
+    /// More information can be found at
+    /// <seealso cref="PowershellVersionDifferences.IsThrottlingBuiltIn"/>.
+    /// </remarks>
+    public static readonly long UpdatePeriodTicks = 2_000_000; // tick is 100ns => 200ms
 
-    /// <summary>
-    /// How many elements should be considered when calculating ETA
-    /// </summary>
-    public const int CalculationLength = 50;
-
-    public DateTime StartTime { get; }
-
-    public DateTime LastDisplayed { get; set; }
+    public long LastDisplayTimeTicks { get; set; }
 
     private TimeBuffer Buffer { get; }
 
-    private TimeKeeper(int calculationLength)
+    public TimeKeeper(int calculationLength)
     {
-        StartTime = DateTime.Now;
-        Buffer = new(calculationLength);
+        Buffer = new TimeBuffer(calculationLength);
         // Make sure the first iteration can be displayed
-        LastDisplayed = StartTime - UpdatePeriod.Multiply(5);
+        // .UtcNow is about 3 times faster than .Now
+        LastDisplayTimeTicks = DateTime.UtcNow.Ticks - UpdatePeriodTicks * 5;
     }
 
-    public TimeKeeper() : this(CalculationLength)
-    { }
 
     /// <inheritdoc cref="TimeBuffer.AddTime()"/>
     public void AddTime() => Buffer.AddTime();
@@ -41,18 +40,17 @@ internal class TimeKeeper
     /// <summary>
     /// Ensure that the progress bar won't be updated too often, which reduces performance.
     /// Updates that come too fast should be ignored.
-    /// <para/>
-    /// Powershell 7 onwards has this behavior built in.
     /// </summary>
     /// <returns></returns>
-    public bool ShouldDisplay()
+    public bool UpdatedPermitted()
     {
-        TimeSpan timePassed = DateTime.Now - LastDisplayed;
-        if (timePassed <= UpdatePeriod)
+        long currentTicks = DateTime.UtcNow.Ticks;
+        long ticksPassed = currentTicks - LastDisplayTimeTicks;
+        if (ticksPassed <= UpdatePeriodTicks)
         {
             return false;
         }
-        LastDisplayed = DateTime.Now;
+        LastDisplayTimeTicks = currentTicks;
         return true;
     }
 }
