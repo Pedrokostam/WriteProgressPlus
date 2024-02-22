@@ -14,7 +14,7 @@ Reset progress bar status for the specified id, or for all of them.
 
 ### NORMAL
 ```
-Reset-ProgressPlus [-ID <Int32[]>] [<CommonParameters>]
+Reset-ProgressPlus [[-ID] <Int32[]>] [<CommonParameters>]
 ```
 
 ### ALL
@@ -92,4 +92,4 @@ IDs of progress bars to be reset.
 ## NOTES
 
 ## RELATED LINKS
-https://github.com/Pedrokostam/WriteProgressPlus/
+[Project repository](https://github.com/Pedrokostam/WriteProgressPlus/)
