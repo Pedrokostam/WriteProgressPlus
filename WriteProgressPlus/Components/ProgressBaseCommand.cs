@@ -32,7 +32,7 @@ public class ProgressBaseCommand : PSCmdlet
                 // Do not write the comlete bar - due to pwsh7 throttling the complete update of bar
                 // will make the new bar not display
                 // From powershell point of view the bar never went away, just changed activity, etc...
-                RemoveProgressInner(current.ID, false);
+                RemoveProgressState(current.ID, false);
                 return AddNewProgressInner(current);
             }
         }
@@ -54,8 +54,8 @@ public class ProgressBaseCommand : PSCmdlet
     /// <para/>
     /// If state is removed, its bar will be updated once with RecordType set to complete to clear it.
     /// </summary>
-    /// <inheritdoc cref="RemoveProgressInner(int, bool)"/>
-    public static bool RemoveProgressInner(int id) => RemoveProgressInner(id, writeCompleted: true);
+    /// <inheritdoc cref="RemoveProgressState(int, bool)"/>
+    public static bool RemoveProgressState(int id) => RemoveProgressState(id, writeCompleted: true);
 
     /// <summary>
     /// Removes progress bar state associated with the given id. Does nothing if id is not associated with anything.
@@ -64,7 +64,7 @@ public class ProgressBaseCommand : PSCmdlet
     /// </summary>
     /// <param name="id">ID of ProgressState</param>
     /// <returns></returns>
-    private static bool RemoveProgressInner(int id, bool writeCompleted)
+    private static bool RemoveProgressState(int id, bool writeCompleted)
     {
         if (!ProgressDict.TryGetValue(id, out ProgressState? progressInner))
         {
@@ -90,12 +90,12 @@ public class ProgressBaseCommand : PSCmdlet
     /// <summary>
     /// Removes all progress bar states
     /// </summary>
-    public void ClearProgressInners()
+    public void ClearProgressStates()
     {
         var keys = ProgressDict.Keys.ToArray();
         foreach (int id in keys)
         {
-            RemoveProgressInner(id);
+            RemoveProgressState(id);
         }
     }
 }

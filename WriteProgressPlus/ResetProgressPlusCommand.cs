@@ -21,7 +21,7 @@ public sealed class ResetProgressPlusCommand : ProgressBaseCommand
         if (All.IsPresent)
         {
             int count = ProgressDict.Count;
-            ClearProgressInners();
+            ClearProgressStates();
             WriteVerbose(Invariant($"Removed all progress bars - {count}"));
         }
     }
@@ -32,7 +32,7 @@ public sealed class ResetProgressPlusCommand : ProgressBaseCommand
         {
             foreach (int i in ID)
             {
-                if (RemoveProgressInner(i + Offset))
+                if (RemoveProgressState(i + Offset))
                     WriteVerbose(Invariant($"Removed progress bar - {i}"));
             }
         }

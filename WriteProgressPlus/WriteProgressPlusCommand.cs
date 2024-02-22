@@ -151,7 +151,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand
         // In pipeline mode, we want to complete the bar and remove it at the end
         if (PipelineMode)
         {
-            RemoveProgressInner(ID);
+            RemoveProgressState(ID);
         }
     }
 
