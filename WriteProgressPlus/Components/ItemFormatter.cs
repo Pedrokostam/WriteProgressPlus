@@ -52,7 +52,7 @@ public partial class ItemFormatter
     /// </summary>
     /// <param name="objects">CurrentItem, CurrentIteration, Percentage, ETA</param>
     /// <returns>Formatted string. Can be null.</returns>
-    public string? FormatItem(params object[]? objects)
+    public string? FormatItem(params object?[]? objects)
     {
         Components.Clear();
         if (objects is null)
@@ -66,7 +66,7 @@ public partial class ItemFormatter
             return Script.InvokeReturnAsIs(objects)?.ToString();
         }
 
-        object firstObject = objects[0];
+        object? firstObject = objects[0];
         if (Properties.Length > 0)
         {
             return GetFormattedProperties(firstObject);
@@ -83,8 +83,12 @@ public partial class ItemFormatter
     /// </summary>
     /// <param name="objectToFormat"></param>
     /// <returns>String of property values or null</returns>
-    private string? GetFormattedProperties(object objectToFormat)
+    private string? GetFormattedProperties(object? objectToFormat)
     {
+        if (objectToFormat is null)
+        {
+            return null;
+        }
         // items from pipeline will actually be PSObjects
         // only specifying it as -InputObject will give the raw object
         if (objectToFormat is PSObject pso)
@@ -133,7 +137,7 @@ public partial class ItemFormatter
     /// <param name="obj"></param>
     void GetPropertyOfNormalObject(object obj)
     {
-        if(obj is PSObject)
+        if (obj is PSObject)
         {
             throw new InvalidOperationException($"Method {nameof(GetPropertyOfNormalObject)} cannot be used on a PSObject");
         }
