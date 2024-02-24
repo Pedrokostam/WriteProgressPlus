@@ -133,7 +133,7 @@ internal sealed class ProgressState
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
-        bool isViewMinimal = IsViewMinimal(donor);
+        (int maxWidth, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
         StatusBuilder.Clear();
         StartNewIteration(donor);
         (int percentage, bool overflow) = GetPercentage(donor);

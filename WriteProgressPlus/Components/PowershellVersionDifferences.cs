@@ -40,22 +40,29 @@ internal static class PowershellVersionDifferences
     /// </summary>
     /// <param name="cmdlet"></param>
     /// <returns></returns>
-    public static bool IsViewMinimal(PSCmdlet cmdlet)
+    public static (int maxWidth, bool isMinimal) GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
     {
-        var runtimeVersion = cmdlet.CommandRuntime.Host.Version;
-        if (runtimeVersion < MinimalProgressVersion)
-        {
-            return false;
-        }
 #if DEBUG
         var dynamicStopwatch = Stopwatch.StartNew();
 #endif
+        var maxWidth = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize.Width;
+        var runtimeVersion = cmdlet.CommandRuntime.Host.Version;
+        if (runtimeVersion < MinimalProgressVersion)
+        {
+            return (maxWidth, false);
+        }
         dynamic psstyle = cmdlet.SessionState.PSVariable.GetValue("PSStyle", defaultValue: null);
-        bool isMinimalView = psstyle?.Progress.View.ToString() == "Minimal";
+        dynamic? progress = psstyle?.Progress;
+        bool isMinimalView = progress?.View.ToString() == "Minimal";
+        if (isMinimalView)
+        {
+            int styleMaxWidth = progress?.MaxWidth;
+            maxWidth = Math.Min(maxWidth, styleMaxWidth);
+        }
 #if DEBUG
         dynamicStopwatch.Stop();
         Debug.WriteLine(message: Invariant($"{(double)dynamicStopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond} ms"));
 #endif
-        return isMinimalView;
+        return (maxWidth, isMinimalView);
     }
 }
