@@ -5,7 +5,7 @@ namespace WriteProgressPlus.Components;
 /// <summary>
 /// Controls how often a progress bar can update, keeps track of iteration times and calculates ETA.
 /// </summary>
-internal class TimeKeeper
+public class TimeKeeper
 {
     /// <summary>
     /// Minimum time between updates of progress bar.

@@ -6,6 +6,7 @@ using System.Management.Automation.Runspaces;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using System.Xml.Serialization;
 using WriteProgressPlus;
 using WriteProgressPlus.Components;
@@ -148,12 +149,12 @@ public class FormatterTests
         var formatter = GetFormatter();
         string? originalResult = formatter.FormatItem(originalItem);
         string? psoResult = formatter.FormatItem(psoWrappedItem);
-        Assert.AreEqual(originalResult,
-                        originalString,
+        Assert.AreEqual(originalString,
+                        originalResult,
                         StringComparer.Ordinal,
                         message: "Formatted original value is different than ToString.");
-        Assert.AreEqual(psoResult,
-                        originalString,
+        Assert.AreEqual(originalString,
+                        psoResult,
                         StringComparer.Ordinal,
                         message: $"Formatted PSObject is different than ToString()");
     }
@@ -186,16 +187,14 @@ public class FormatterTests
         var psoResult = formatter.FormatItem(GetAsPsObject(obj));
         var psoSplit = psoResult?.Split(fseparator);
 
-        Assert.AreEqual(originalSplit?.Length ?? 0, targetProperties.Length, message: "Formatted original value yield fewer elements than properties");
-        Assert.AreEqual(psoSplit?.Length ?? 0, targetProperties.Length, message: "Formatted original value yield fewer elements than properties");
+        Assert.AreEqual(targetProperties.Length, originalSplit?.Length ?? 0, message: "Formatted original value yield fewer elements than properties");
+        Assert.AreEqual(targetProperties.Length, psoSplit?.Length ?? 0, message: "Formatted original value yield fewer elements than properties");
 
-        Assert.AreEqual(originalResult,
-                        target,
-                        StringComparer.Ordinal,
+        Assert.AreEqual(target, originalResult,
+                                    StringComparer.Ordinal,
                         message: $"Formatted original value is different than ToString()");
-        Assert.AreEqual(psoResult,
-                        target,
-                        StringComparer.Ordinal,
+        Assert.AreEqual(target, psoResult,
+                                    StringComparer.Ordinal,
                         message: $"Formatted PSObject is different than ToString()");
         // TODO Find a way to control order
     }
@@ -266,5 +265,22 @@ public class FormatterTests
         var resultOrig = formatterOrig.FormatItem("a", "b", "c", "d");
         var resultAlias = formatterAlias.FormatItem("a", "b", "c", "d");
         Assert.AreEqual(resultOrig, resultAlias, message: $"Aliases mismatch ({aliased})");
+    }
+    [DataTestMethod()]
+    [DataRow("$_.Minute", "37")]
+    [DataRow("$_.Hour, $_.Minute", "21 37")]
+    [DataRow("\"$($_.Hour)$($_.Minute)\"", "2137")]
+    [DataRow("$z = $_.AddMinutes(1);$z.Minute", "38")]
+    [DataRow("$_.Minute.ToString('d5')", "00037")]
+    public void ScriptPropertiesMethodsTest(string? script, string? target)
+    {
+        ScriptBlock? scriptBlock = script switch
+        {
+            null => null,
+            _ => ScriptBlock.Create(script),
+        };
+        var formatter = GetFormatter(scriptBlock);
+        var result = formatter.FormatItem(TestDate);
+        Assert.AreEqual(target, result, StringComparer.Ordinal,message:script);
     }
 }

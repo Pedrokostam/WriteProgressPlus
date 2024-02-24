@@ -4,7 +4,7 @@
 /// Simple implementation of a circular buffer.
 /// Stores recent TimeSpans and can calculate moving average.
 /// </summary>
-class TimeBuffer
+public class TimeBuffer
 {
     /// <summary>
     /// Upper limit to avoid having too large buffers.
