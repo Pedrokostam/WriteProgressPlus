@@ -1,11 +1,9 @@
-namespace WriteProgressPlus.Tests;
+﻿namespace WriteProgressPlus.Tests;
 
 using System.Drawing;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 using WriteProgressPlus;
 using WriteProgressPlus.Components;
@@ -13,8 +11,6 @@ using WriteProgressPlus.Components;
 [TestClass]
 public class FormatterTests
 {
-    static PowerShell Pwsh { get; }
-
     public ItemFormatter GetFormatter(ScriptBlock? script = null, string[]? properties = null, string? separator = null)
     {
         var formatter = new ItemFormatter();
@@ -29,21 +25,16 @@ public class FormatterTests
                                                      second: 5,
                                                      millisecond: 69,
                                                      microsecond: 966);
-    static FormatterTests()
-    {
-        Pwsh = PowerShell.Create();
-        Runspace.DefaultRunspace = Pwsh.Runspace;
-        Wrapper = ScriptBlock.Create("$args[0]");
-    }
 
-    static ScriptBlock Wrapper { get; }
     public static PSObject? GetAsPsObject(object? obj)
     {
         // Code below will wrap a null value into a PSObject, which is not what happens within the pipeline
         // In the pipeline, object with value become wrapped, but null is null
         if (obj is null)
             return null;
-        var res = Wrapper.Invoke(obj);
+        using PowerShell ps = PowerShell.Create();
+        ps.AddScript("$args[0]").AddArgument(obj);
+        var res = ps.Invoke();
         return res[0];
 
     }
@@ -103,7 +94,6 @@ public class FormatterTests
             return items.Select(item => new object?[] { item.Item1, item.Item2 });
         }
     }
-
     public static string PropertyOrderTestValuesDisplayName(MethodInfo methodInfo, object[] data)
     {
         var obj = data[0];
@@ -112,7 +102,6 @@ public class FormatterTests
         string type = obj?.GetType().Name ?? "<null type>";
         return $"{type} - {string.Join(", ", props)} - {string.Join(", ", targets)}";
     }
-
     public static IEnumerable<object?[]> PropertyOrderTestValues
     {
         get
@@ -127,7 +116,6 @@ public class FormatterTests
             return items.Select(item => new object?[] { item.Item1, item.Item2, item.Item3 });
         }
     }
-
     [TestInitialize]
     public void InitTestDatePSObject()
     {
@@ -171,9 +159,9 @@ public class FormatterTests
         Assert.AreEqual(formattedLower, formattedUpper, StringComparer.Ordinal);
     }
 
-    [TestMethod("Properties values match actual values")]
+    [TestMethod]
     [DynamicData(nameof(PropertyOrderTestValues), DynamicDataDisplayName = nameof(PropertyOrderTestValuesDisplayName))]
-    public void PropertiesMatchValueTest(object obj, string[] properties, object[] targetProperties)
+    public void Value(object obj, string[] properties, object[] targetProperties)
     {
         var formatter = GetFormatter(properties: properties);
 
@@ -216,55 +204,14 @@ public class FormatterTests
         }
     }
 
-    [DataTestMethod()]
-    [DataRow(data: null, DisplayName = "<null>")]
-    [DataRow(data: " ")] // " "
-    [DataRow(data: ", ")] // ", "
-    [DataRow(data: ":")] // ":"
-    [DataRow("\0", DisplayName = "<Null byte>")] //"\0"
-    [DataRow("żźć")] // "żźć"
-    [DataRow("獩")] // "獩"
-    public void SeparatorsSameTest(string? separator)
+    [TestMethod]
+    [DataRow(data: null)]
+    [DataRow(":")]
+    [DataRow("\0")]
+    [DataRow("żźć")]
+    public void TestSeparators(string? separator)
     {
-        string? separatorForRegex = separator ?? ItemFormatter.DefaultSeparator;
-        string? separatorDisplay = separator switch
-        {
-            null => "<null>",
-            _ => string.Join(", ", Encoding.UTF8.GetBytes(separator).Select(x => x.ToString("X2")))
-        };
-
-        string[] props = ["year", "month", "Day", "Hour", "Minute", "Second", "Millisecond", "MicroSecond"];
-        var formatter = GetFormatter(separator: separator, properties: props);
-        var result = formatter.FormatItem(TestDate);
-        Assert.IsNotNull(result, "Formatter yielded null time from datetime");
-
-        var occurences = Regex.Matches(result, Regex.Escape(separatorForRegex));
-        int expected = props.Length - 1; // off by one
-        Assert.AreEqual(expected, occurences.Count, $"Separator {separatorDisplay} did not occur correct number of times");
+        var formatter =
     }
 
-    [DataTestMethod()]
-    [DataRow("$_, $c, $p, $t", "$args[0], $args[1], $args[2], $args[3]")]
-    [DataRow("$c, $p, $t, $_", "$args[1], $args[2], $args[3], $args[0]")]
-    [DataRow("$_, $c, $p, $t", "$ARGS[0], $ARGS[1], $ARGS[2], $ARGS[3]")]
-    [DataRow("$_, $C, $P, $T", "$args[0], $args[1], $args[2], $args[3]")]
-    [DataRow("$_, $C, $P, $T", "$ARGS[0], $ARGS[1], $ARGS[2], $ARGS[3]")]
-    [DataRow("$p, $t", "$args[2], $args[3]")]
-    [DataRow("$_, $_, $_, $_, $_", "$args[0], $args[0], $args[0], $args[0], $args[0]")]
-    [DataRow("$t, $t, $t, $t, $t", "$args[3], $args[3], $args[3], $args[3], $args[3]")]
-    public void ArgumentAliasTest(string aliased, string originals)
-    {
-        if (aliased.Split(',').Length != originals.Split(',').Length)
-        {
-            throw new ArgumentException("Mismatched number of aliases and originals");
-        }
-        //using PowerShell pwsh = PowerShell.Create();
-        //Runspace.DefaultRunspace = pwsh.Runspace; // RunspaceFactory.CreateRunspace(InitialSessionState.Create());
-
-        var formatterOrig = GetFormatter(ScriptBlock.Create(originals));
-        var formatterAlias = GetFormatter(ScriptBlock.Create(aliased));
-        var resultOrig = formatterOrig.FormatItem("a", "b", "c", "d");
-        var resultAlias = formatterAlias.FormatItem("a", "b", "c", "d");
-        Assert.AreEqual(resultOrig, resultAlias, message: $"Aliases mismatch ({aliased})");
-    }
 }

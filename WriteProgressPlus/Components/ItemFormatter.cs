@@ -7,7 +7,13 @@ namespace WriteProgressPlus.Components;
 
 public partial class ItemFormatter
 {
-    private readonly static string DefaultSeparator = " ";
+    public enum FormatSource
+    {
+        Script,
+        Properties,
+        ToString,
+    }
+    public readonly static string DefaultSeparator = " ";
     private readonly static TimeSpan RegexTimeout = TimeSpan.FromMilliseconds(100);
 
     readonly List<object?> Components = [];
@@ -232,5 +238,14 @@ public partial class ItemFormatter
             "?" => ".",
             _ => matchedString,
         };
+    }
+
+    public FormatSource GetFormatSourceType()
+    {
+        if (Script is not null)
+            return FormatSource.Script;
+        if (Properties.Length > 0)
+            return FormatSource.Properties;
+        return FormatSource.ToString;
     }
 }
