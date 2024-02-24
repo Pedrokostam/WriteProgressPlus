@@ -1,4 +1,5 @@
-﻿using System.Management.Automation;
+﻿using System.Diagnostics;
+using System.Management.Automation;
 using System.Text;
 using static System.Globalization.CultureInfo;
 using static WriteProgressPlus.Components.PowershellVersionDifferences;
@@ -132,6 +133,7 @@ internal sealed class ProgressState
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
+        bool isViewMinimal = IsViewMinimal(donor);
         StatusBuilder.Clear();
         StartNewIteration(donor);
         (int percentage, bool overflow) = GetPercentage(donor);
