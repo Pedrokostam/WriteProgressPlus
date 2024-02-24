@@ -1,4 +1,6 @@
-﻿namespace WriteProgressPlus.Components;
+﻿using System.Collections.ObjectModel;
+
+namespace WriteProgressPlus.Components;
 
 /// <summary>
 /// Simple implementation of a circular buffer.
@@ -23,7 +25,7 @@ public class TimeBuffer
     public int MaxLength { get; }
 
     /// <summary>
-    /// How many elements wre inserted.
+    /// How many elements were inserted.
     /// </summary>
     private int CurrentIndex = 0;
 
@@ -60,6 +62,17 @@ public class TimeBuffer
         }
     }
 
+    public ICollection<TimeSpan> TimeSpans
+    {
+        get
+        {
+            if (CurrentIndex < MaxLength)
+            {
+                return timeSpans.Take(CurrentIndex).ToList();
+            }
+            return new ReadOnlyCollection<TimeSpan>(timeSpans);
+        }
+    }
 
     /// <summary>
     /// Calculates estimated time to completion.

@@ -25,6 +25,7 @@ public class TimeBufferTests
             .Select(TimeSpan.FromTicks).ToArray();
     }
     public static IEnumerable<object?[]> TestRunningAverageTestValues => [
+        [GetTimeSpanArray(0,100),0,0],
         [GetTimeSpanArray(10,100,90,80,70,110),90,0],
         [GetTimeSpanArray(10,100,90,80,70,110),90,50],
         [GetTimeSpanArray(10,100,90,80,70,110),90,150],
@@ -47,10 +48,10 @@ public class TimeBufferTests
         return $"{arrLen} values with target {target} and calc length of {calcLen}";
     }
     [TestMethod("Running average calculated correctly")]
-    [DynamicData(nameof(TestRunningAverageTestValues),DynamicDataDisplayName =nameof(TestRunningAverageTestValuesDisplayName))]
+    [DynamicData(nameof(TestRunningAverageTestValues), DynamicDataDisplayName = nameof(TestRunningAverageTestValuesDisplayName))]
     public void TestRunningAverage(TimeSpan[] ts, long targetTicks, int calculationLength)
     {
-        var buff = new TimeBuffer(calculationLength );
+        var buff = new TimeBuffer(calculationLength);
         DateTime date = DateTime.Now;
         buff.AddTime(date);
         foreach (var item in ts)
@@ -59,5 +60,29 @@ public class TimeBufferTests
             buff.AddTime(date);
         }
         Assert.AreEqual(TimeSpan.FromTicks(targetTicks), buff.CalculateMovingAverageTime());
+    }
+    [DataTestMethod]
+    [DataRow(10,10)]
+    [DataRow(100,10)]
+    [DataRow(10,100)]
+    [DataRow(500,100)]
+    public void TestValueReplacing(int inputLength, int calculationLength)
+    {
+        var buff = new TimeBuffer(calculationLength);
+        calculationLength = buff.MaxLength;
+        DateTime date = DateTime.Now;
+        buff.AddTime(date);
+        var range = Enumerable.Range(1, inputLength).ToArray();
+        foreach (var item in range)
+        {
+            date += TimeSpan.FromTicks(item);
+            buff.AddTime(date);
+        }
+        var cutOff = range
+            .TakeLast(calculationLength)
+            .Select(x => TimeSpan.FromTicks(x))
+            .ToArray();
+        bool seqEq = cutOff.SequenceEqual(buff.TimeSpans);
+        Assert.IsTrue(seqEq,"Timespans in buffer do not match expected values");
     }
 }
