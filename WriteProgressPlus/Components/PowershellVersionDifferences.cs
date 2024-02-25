@@ -39,17 +39,17 @@ internal static class PowershellVersionDifferences
     /// Since this Powershell library does not have the definition of this class, we have to use dynamic objects.
     /// </summary>
     /// <param name="cmdlet"></param>
-    /// <returns></returns>
-    public static (int maxWidth, bool isMinimal) GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
+    /// <returns>Tuple of 2 values: whole line width and whether its minimal view</returns>
+    public static (int lineWidth, bool isMinimal) GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
     {
 #if DEBUG
         var dynamicStopwatch = Stopwatch.StartNew();
 #endif
-        var maxWidth = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize.Width;
+        var lineWidth = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize.Width;
         var runtimeVersion = cmdlet.CommandRuntime.Host.Version;
         if (runtimeVersion < MinimalProgressVersion)
         {
-            return (maxWidth, false);
+            return (lineWidth, false);
         }
         dynamic psstyle = cmdlet.SessionState.PSVariable.GetValue("PSStyle", defaultValue: null);
         dynamic? progress = psstyle?.Progress;
@@ -57,12 +57,12 @@ internal static class PowershellVersionDifferences
         if (isMinimalView)
         {
             int styleMaxWidth = progress?.MaxWidth;
-            maxWidth = Math.Min(maxWidth, styleMaxWidth);
+            lineWidth = Math.Min(lineWidth, styleMaxWidth);
         }
 #if DEBUG
         dynamicStopwatch.Stop();
         Debug.WriteLine(message: Invariant($"{(double)dynamicStopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond} ms"));
 #endif
-        return (maxWidth, isMinimalView);
+        return (lineWidth, isMinimalView);
     }
 }

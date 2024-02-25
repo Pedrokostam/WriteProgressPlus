@@ -140,7 +140,8 @@ internal sealed class ProgressState
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
-        (int maxWidth, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
+        (int lineWidth, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
+
         StatusBuilder.Clear();
         StartNewIteration(donor);
         int percentage = GetPercentage(donor);
