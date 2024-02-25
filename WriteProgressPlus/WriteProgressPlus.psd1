@@ -15,7 +15,7 @@
     ModuleVersion      = '0.0.1'
 
     # Supported PSEditions
-    CompatiblePSEditions = @('Desktop', 'Core')
+    # CompatiblePSEditions = @('Desktop', 'Core')
 
     # ID used to uniquely identify this module
     GUID               = '19da6c54-8e49-4a5f-b424-4ba6e3500783'
@@ -33,13 +33,13 @@
     Description        = 'Extension of the standard WriteProgress, which simplifies control, automates its functionalities and extends its capabilities, including support for in-pipeline placement. Write-ProgressPlus is a cmdlet can calculate remaining time, track current iteration and calculate percentage, preserve state across commands and automatically create status message.'
 
     # Minimum version of the PowerShell engine required by this module
-    PowerShellVersion  = '5.1'
+    PowerShellVersion  = '3.0'
 
     # Name of the PowerShell host required by this module
     PowerShellHostName = 'ConsoleHost'
 
     # Minimum version of the PowerShell host required by this module
-    PowerShellHostVersion = '5.1'
+    PowerShellHostVersion = '4.0'
 
     # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
     DotNetFrameworkVersion = '4.6.1'
