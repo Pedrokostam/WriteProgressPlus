@@ -12,6 +12,15 @@ internal sealed class ProgressState
 
     private readonly string Placeholder = "placeholder";
 
+    /// <summary>
+    /// Value that needs to be passed to Write-Progress to hide/disable progress bar.
+    /// </summary>
+    private const int ProgressBarDisabled = -1;
+    /// <summary>
+    /// A number smaller than <see cref="ProgressBarDisabled"/>
+    /// </summary>
+    private const int Overflow = -100;
+
     public ProgressState(WriteProgressPlusCommand donor)
     {
         Id = donor.ID;
@@ -111,24 +120,22 @@ internal sealed class ProgressState
     /// </summary>
     /// <param name="donor"></param>
     /// <returns>Tuple with calculated percentage and a flag whether current iteration is greater than total count.</returns>
-    private (int percentage, bool overflow) GetPercentage(WriteProgressPlusCommand donor)
+    private int GetPercentage(WriteProgressPlusCommand donor)
     {
         int percentage;
-        bool overflow = false;
         if (donor.TotalCount > 0)
         {
             percentage = ActualCurrentIteration * 100 / donor.TotalCount;
             if (percentage > 100)
             {
-                overflow = true;
-                percentage = 100;
+                percentage = Overflow;
             }
         }
         else // No TotalCount means we cannot calculate percentage
         {
-            percentage = 0;
+            percentage = ProgressBarDisabled; // set to negative one to hide progress bar in classic view
         }
-        return (percentage, overflow);
+        return percentage;
     }
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
@@ -136,10 +143,11 @@ internal sealed class ProgressState
         (int maxWidth, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
         StatusBuilder.Clear();
         StartNewIteration(donor);
-        (int percentage, bool overflow) = GetPercentage(donor);
+        int percentage = GetPercentage(donor);
+
         AppendFormattedItem(donor, percentage);
         AppendCounter(donor);
-        AppendPercentage(donor, percentage, overflow);
+        AppendPercentage(donor, percentage);
         int remainingSeconds = GetRemainingSeconds(donor);
         UpdateAssociatedRecord(donor, percentage, remainingSeconds);
     }
@@ -151,7 +159,7 @@ internal sealed class ProgressState
         AssociatedRecord.Activity = donor.Activity;
         AssociatedRecord.SecondsRemaining = remainingSeconds;
         AssociatedRecord.ParentActivityId = donor.ParentID >= ProgressBaseCommand.Offset ? donor.ParentID : -1;
-        AssociatedRecord.PercentComplete = percentage;
+        AssociatedRecord.PercentComplete = Math.Min(100,Math.Max(percentage,ProgressBarDisabled)); // Value has to be in <-1,100>
     }
 
     /// <summary>
@@ -177,7 +185,7 @@ internal sealed class ProgressState
             return;
         }
 
-        if (overflow)
+        if (percentage == Overflow)
         {
             StatusBuilder.Append("[Incorrect total count]");
         }
