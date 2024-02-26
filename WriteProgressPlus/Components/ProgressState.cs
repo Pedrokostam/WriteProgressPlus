@@ -138,6 +138,7 @@ internal sealed class ProgressState
         return percentage;
     }
 
+
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
         (int lineWidth, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
@@ -145,6 +146,12 @@ internal sealed class ProgressState
         StatusBuilder.Clear();
         StartNewIteration(donor);
         int percentage = GetPercentage(donor);
+
+        string? item = GetFormattedItem(donor, percentage);
+        string? counter = GetCounter(donor);
+        var per = GetPercentage(donor, percentage);
+        var rem = GetRemainingSeconds(donor);
+
 
         AppendFormattedItem(donor, percentage);
         AppendCounter(donor);
@@ -179,7 +186,7 @@ internal sealed class ProgressState
     /// <param name="donor"></param>
     /// <param name="percentage"></param>
     /// <param name="overflow"></param>
-    private void AppendPercentage(WriteProgressPlusCommand donor, int percentage, bool overflow)
+    private void AppendPercentage(WriteProgressPlusCommand donor, int percentage)
     {
         if (donor.TotalCount <= 0 || donor.NoPercentage)
         {
@@ -193,6 +200,23 @@ internal sealed class ProgressState
         else
         {
             StatusBuilder.AppendFormat(InvariantCulture, "{0:d2}%", percentage);
+        }
+    }
+
+    private string? GetPercentage(WriteProgressPlusCommand donor, int percentage)
+    {
+        if (donor.TotalCount <= 0 || donor.NoPercentage)
+        {
+            return null;
+        }
+
+        if (percentage == Overflow)
+        {
+            return "[Incorrect total count]";
+        }
+        else
+        {
+            return string.Format(InvariantCulture, "{0:d2}%", percentage);
         }
     }
 
@@ -213,6 +237,19 @@ internal sealed class ProgressState
             StatusBuilder.Append('/').Append(donor.TotalCount);
         }
         StatusBuilder.Append(' '); // space for possible next parts
+    }
+
+    private string? GetCounter(WriteProgressPlusCommand donor)
+    {
+        if (donor.NoCounter)
+        {
+            return null;
+        }
+        return donor.TotalCount switch
+        {
+            > 0 => string.Format(InvariantCulture, "{0:d3}/{1}", ActualCurrentIteration, donor.TotalCount),
+            _ => string.Format(InvariantCulture, "{0:d3}", ActualCurrentIteration),
+        };
     }
 
     /// <summary>
@@ -238,6 +275,21 @@ internal sealed class ProgressState
                 StatusBuilder.Append(" - ");
             }
         }
+    }
+
+    private string? GetFormattedItem(WriteProgressPlusCommand donor, int percentage)
+    {
+        // object hidden or null - skip
+        if (donor.HideObject || donor.InputObject is null)
+        {
+            return null;
+        }
+        object[] package = [donor.InputObject, ActualCurrentIteration, percentage, donor.TotalCount];
+        if (donor.Formatter.FormatItem(package) is string formatted)
+        {
+            return formatted;
+        }
+        return null;
     }
 
     /// <summary>
