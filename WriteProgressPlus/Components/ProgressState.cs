@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Management.Automation;
 using System.Text;
+using System.Text.RegularExpressions;
 using static System.Globalization.CultureInfo;
 using static WriteProgressPlus.Components.PowershellVersionDifferences;
 
@@ -138,6 +139,27 @@ internal sealed class ProgressState
         return percentage;
     }
 
+    private Elements GetElements(WriteProgressPlusCommand donor)
+    {
+        Elements elements = Elements.All;
+        if (donor.NoETA)
+        {
+            elements &= ~Elements.TimeRemaining;
+        }
+        if (donor.NoCounter)
+        {
+            elements &= ~(Elements.Iteration | Elements.TotalCount);
+        }
+        if (donor.NoPercentage)
+        {
+            elements &= ~Elements.Percentage;
+        }
+        if (donor.HideObject)
+        {
+            elements &= ~(Elements.ItemScript | Elements.ItemProperties);
+        }
+        return elements;
+    }
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
@@ -145,19 +167,44 @@ internal sealed class ProgressState
 
         StatusBuilder.Clear();
         StartNewIteration(donor);
-        int percentage = GetPercentage(donor);
+        var visibleElements = GetElements(donor);
+        var counter = new Counter(ActualCurrentIteration, donor.TotalCount);
+        var formattedItem = GetFormattedItem(donor, counter.Percent);
+        int remainingSeconds = GetRemainingSeconds(donor);
+        var input = new BarInput(formattedItem,counter,donor.Activity, remainingSeconds, lineWidth, visibleElements);
 
+
+
+
+        var remainingSeconds = GetRemainingSeconds(donor);
         string? item = GetFormattedItem(donor, percentage);
         string? counter = GetCounter(donor);
-        var per = GetPercentage(donor, percentage);
-        var rem = GetRemainingSeconds(donor);
+        var per = GetPercentageString(donor, percentage);
 
 
         AppendFormattedItem(donor, percentage);
         AppendCounter(donor);
         AppendPercentage(donor, percentage);
-        int remainingSeconds = GetRemainingSeconds(donor);
         UpdateAssociatedRecord(donor, percentage, remainingSeconds);
+    }
+
+    private string GetMinimalStatus(string? item, string? counter, string? percentage, int remainingTime, int lineWidth, string activity)
+    {
+        if (item is not null)
+        {
+            item = Regex.Replace(item, @"\r\n?|\n", "", RegexOptions.Compiled, TimeSpan.FromMilliseconds(30));
+        }
+        item ??= string.Empty;
+
+        int actualSpace = lineWidth - (activity.Length + 3);
+        int remainingDigits = remainingTime < 0 ? 0 : (int)Math.Log10(remainingTime) + 1;
+        remainingDigits += 2; // space and s
+        actualSpace -= remainingDigits;
+    }
+
+    private string GetClassicFullStatus()
+    {
+
     }
 
     private void UpdateAssociatedRecord(WriteProgressPlusCommand donor, int percentage, int remainingSeconds)
@@ -167,7 +214,7 @@ internal sealed class ProgressState
         AssociatedRecord.Activity = donor.Activity;
         AssociatedRecord.SecondsRemaining = remainingSeconds;
         AssociatedRecord.ParentActivityId = donor.ParentID >= ProgressBaseCommand.Offset ? donor.ParentID : -1;
-        AssociatedRecord.PercentComplete = Math.Min(100,Math.Max(percentage,ProgressBarDisabled)); // Value has to be in <-1,100>
+        AssociatedRecord.PercentComplete = Math.Min(100, Math.Max(percentage, ProgressBarDisabled)); // Value has to be in <-1,100>
     }
 
     /// <summary>
@@ -203,7 +250,7 @@ internal sealed class ProgressState
         }
     }
 
-    private string? GetPercentage(WriteProgressPlusCommand donor, int percentage)
+    private string? GetPercentageString(WriteProgressPlusCommand donor, int percentage)
     {
         if (donor.TotalCount <= 0 || donor.NoPercentage)
         {
