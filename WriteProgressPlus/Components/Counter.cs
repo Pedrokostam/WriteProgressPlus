@@ -58,29 +58,35 @@ public readonly record struct Counter
 
     public bool KnownTotal => Total > 0;
 
-    public string? GetTextForm(Elements elements, int maxLength)
+    public string GetTextForm(Elements elements, int maxLength)
     {
         // [counter_part] ([percent_part])
-        string? counterPart = GetCounterString(elements, maxLength);
-        if (counterPart == null)
+        string counterPart = GetCounterString(elements, maxLength);
+        // if we have a counter part, percents will be in parentheses, after a space
+        // otherwise, there will be only percents or nothing
+        int percentLengthReserved = counterPart == "" ? counterPart.Length + 3 : 0;
+        string percentPart = GetPercentString(elements, maxLength - percentLengthReserved);
+
+        string result = (counterPart, percentPart) switch
         {
-            return null;
-        }
-        if (GetPercentString(elements, maxLength - counterPart.Length - 3) is string percentPart)
-        {
-            return string.Format("{0} ({1})", counterPart, percentPart);
-        }
-        return counterPart;
+            ({ Length: 0 }, { Length: 0 }) => string.Empty,
+            ({ Length: > 0 }, { Length: 0 }) => counterPart,
+            ({ Length: 0 }, { Length: > 0 }) => percentPart,
+            ({ Length: > 0 }, { Length: > 0 }) => $"{counterPart} ({percentPart})",
+
+        };
+
+        return result;
 
     }
-    public string? GetCounterString(Elements elements, int maxLength)
+    public string GetCounterString(Elements elements, int maxLength)
     {
         bool iterationPresent = elements.HasFlag(Elements.Iteration) && IsIterationProvided;
         bool totalPresent = elements.HasFlag(Elements.TotalCount) && IsTotalProvided;
         if (!iterationPresent && !totalPresent || maxLength == 0)
         {
             // Neither part of counter is requested (or we don;t have any space)
-            return null;
+            return string.Empty;
         }
         string total = string.Empty;
         string iteration = string.Empty;
@@ -114,7 +120,7 @@ public readonly record struct Counter
             else
             {
                 // we cannot even fit current iteration - return null
-                return null;
+                return string.Empty;
             }
         }
         // All three parts can fit
@@ -124,21 +130,21 @@ public readonly record struct Counter
         // PadRight returns unchanged instance if nothing is done.
         iteration = iteration.PadRight(total.Length);
 
-        return string.Format("{0}/{1}", iteration, total);
+        return $"{iteration}/{total}";
     }
 
-    public string? GetPercentString(Elements elements, int maxLength)
+    public string GetPercentString(Elements elements, int maxLength)
     {
         int percent = this.Percent;
         if (percent < 0 || !elements.HasFlag(Elements.Percentage))
         {
-            return null;
+            return string.Empty;
         }
         string p = percent.ToString(@"00\%", CultureInfo.InvariantCulture);
         if (p.Length > maxLength)
         {
             // can't really trim it
-            return null;
+            return string.Empty;
         }
         return p;
     }
