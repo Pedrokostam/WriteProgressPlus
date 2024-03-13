@@ -14,5 +14,5 @@ public enum Elements
     TotalCount = 0b00010000,
     Percentage = 0b00100000,
     Counter = Iteration | TotalCount,
-    All = ~0
+    All = ItemScript | ItemProperties | TimeRemaining | Percentage | Counter,
 }

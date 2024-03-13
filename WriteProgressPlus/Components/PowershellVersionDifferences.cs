@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.Management.Automation;
 using System.Text;
 using static System.FormattableString;
@@ -40,16 +39,17 @@ internal static class PowershellVersionDifferences
     /// </summary>
     /// <param name="cmdlet"></param>
     /// <returns>Tuple of 2 values: whole line width and whether its minimal view</returns>
-    public static (int lineWidth, bool isMinimal) GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
+    public static (Size, bool isMinimal) GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
     {
 #if DEBUG
         var dynamicStopwatch = Stopwatch.StartNew();
 #endif
-        var lineWidth = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize.Width;
+        var buffer = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize;
+        var lineWidth = buffer.Width;
         var runtimeVersion = cmdlet.CommandRuntime.Host.Version;
         if (runtimeVersion < MinimalProgressVersion)
         {
-            return (lineWidth, false);
+            return (buffer, false);
         }
         dynamic psstyle = cmdlet.SessionState.PSVariable.GetValue("PSStyle", defaultValue: null);
         dynamic? progress = psstyle?.Progress;
@@ -63,6 +63,6 @@ internal static class PowershellVersionDifferences
         dynamicStopwatch.Stop();
         Debug.WriteLine(message: Invariant($"{(double)dynamicStopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond} ms"));
 #endif
-        return (lineWidth, isMinimalView);
+        return (new Size(lineWidth, buffer.Height), isMinimalView);
     }
 }

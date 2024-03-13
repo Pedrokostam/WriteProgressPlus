@@ -19,7 +19,6 @@ namespace WriteProgressPlus.Components;
 public readonly record struct Counter
 {
     public const int BarDisabled = -1;
-    //public const int BarOverflowed = -100;
     public const string Separator = "/";
 
     public readonly int Iteration;
@@ -37,23 +36,57 @@ public readonly record struct Counter
         this.Total = total;
     }
 
-    public bool IsTotalProvided => this.Total < 0;
-    public bool IsIterationProvided => this.Total < 0;
+    /// <summary>
+    /// Checks whether Total is positive
+    /// </summary>
+    public bool IsTotalProvided => this.Total > 0;
+    /// <summary>
+    /// Checks whether Current iteration is positive or zero
+    /// </summary>
+    public bool IsIterationProvided => this.Iteration >= 0;
 
+    /// <summary>
+    /// Return the calculated percentage, or -1, if either total or current are not provided.
+    /// </summary>
     public int Percent
     {
         get
         {
-            if (this.Total <= 0 || this.Iteration < 0)
+            if (IsTotalProvided && IsIterationProvided)
             {
-                return Counter.BarDisabled;
+                return this.Iteration * 100 / this.Total;
             }
-            return this.Total / this.Iteration;
+            return Counter.BarDisabled;
         }
     }
 
     public bool KnownTotal => this.Total > 0;
 
+    /// <summary>
+    /// Create the text form of counter with percents: {current}/{total} ({percent})
+    /// <para/>
+    /// If total is non-positive or <paramref name="elements"/> does not have it, its part will be skipped. 
+    /// <para/>
+    /// If current iteration is non-positive or <paramref name="elements"/> does not have it, its part will be skipped. 
+    /// <para/>
+    /// Skipping one part leave just the other, with no additional characters.
+    /// <para/>
+    /// If percent is non-positive or <paramref name="elements"/> does not have it, its part will be skipped. 
+    /// <para/>
+    /// Skipping all parts in an empty string.
+    /// If only percent is present, it will be displayed without parentheses
+    /// <para/>
+    /// The result will fit in <paramref name="maxLength"/>, removing elements as necessary. The elements will be removed in order:
+    /// <list type="number">
+    ///     <item>Percent</item>
+    ///     <item>Total</item>
+    ///     <item>Current</item>
+    /// </list>
+    /// </summary>
+    /// <param name="elements">Which elements user wants to be visible in status.</param>
+    /// <param name="maxLength">Space in which the result must fit.</param>
+    /// <returns>Concatenation of current, total and percent, one or two of the elements, or an empty string </returns>
+    /// <returns></returns>
     public string GetTextForm(Elements elements, int maxLength)
     {
         // [counter_part] ([percent_part])
@@ -75,6 +108,26 @@ public readonly record struct Counter
         return result;
 
     }
+    /// <summary>
+    /// Create the text form of counter: {current}/{total}
+    /// <para/>
+    /// If total is non-positive or <paramref name="elements"/> does not have it, its part will be skipped. 
+    /// <para/>
+    /// If current iteration is non-positive or <paramref name="elements"/> does not have it, its part will be skipped. 
+    /// <para/>
+    /// Skipping one part leave just the other, with no additional characters.
+    /// <para/>
+    /// Skipping both results in an empty string.
+    /// <para/>
+    /// The result will fit in <paramref name="maxLength"/>, removing elements as necessary. The elements will be removed in order:
+    /// <list type="number">
+    ///     <item>Total</item>
+    ///     <item>Current</item>
+    /// </list>
+    /// </summary>
+    /// <param name="elements">Which elements user wants to be visible in status.</param>
+    /// <param name="maxLength">Space in which the result must fit.</param>
+    /// <returns>Concatenation of current and total with separator, one of the elements, or an empty string </returns>
     public string GetCounterString(Elements elements, int maxLength)
     {
         bool iterationPresent = elements.HasFlag(Elements.Iteration) && this.IsIterationProvided;
@@ -86,7 +139,6 @@ public readonly record struct Counter
         }
         string total = string.Empty;
         string iteration = string.Empty;
-        string separator = string.Empty;
         if (totalPresent)
         {
             total = this.Total.ToString(CultureInfo.InvariantCulture);
@@ -95,14 +147,19 @@ public readonly record struct Counter
         {
             iteration = this.Iteration.ToString(CultureInfo.InvariantCulture);
         }
-        if (iterationPresent && totalPresent)
+
+        if (!totalPresent && iterationPresent)
         {
-            // if both are present, add a separator
-            separator = Counter.Separator;
+            return iteration;
         }
+        if (totalPresent && !iterationPresent)
+        {
+            return total;
+        }
+
         int partLength = Math.Max(total.Length, iteration.Length);
         // possible length includes iteration part padded to at least the width of total count.
-        int possibleLength = partLength * 2 + separator.Length;
+        int possibleLength = partLength * 2 + Counter.Separator.Length;
 
         if (possibleLength > maxLength)
         {
@@ -121,21 +178,52 @@ public readonly record struct Counter
         }
         // All three parts can fit
 
-        // PadRight, since we want the iteration part to have at least as many character as the total part
+        // PadLeft, since we want the iteration part to have at least as many character as the total part
         // this way, the total width will not change with iteration (at least while below totalcount)
-        // PadRight returns unchanged instance if nothing is done.
-        iteration = iteration.PadRight(total.Length);
+        // PadLeft returns unchanged instance if nothing is done.
+        iteration = iteration.PadLeft(total.Length, '0');
 
         return $"{iteration}/{total}";
     }
 
-    public string GetPercentString(Elements elements, int maxLength)
+    /// <summary>
+    /// Formats the percentage to string with 2 digit format.
+    /// <para/>
+    /// If percentage is negative, or it's not requested in <paramref name="elements"/> it will be an empty string.
+    /// If the result would be longer than <paramref name="maxLength"/>, an empty string will be returned.
+    /// </summary>
+    /// <param name="elements">Which elements user wants to be visible in status.</param>
+    /// <param name="maxLength">Space in which the result must fit.</param>
+    /// <returns></returns>
+    public string GetPercentString(Elements elements, int maxLength) => GetPercentStringImpl(elements, maxLength, @"00\%");
+
+    /// <summary>
+    /// Formats the percentage to string with 1 digit format.
+    /// <para/>
+    /// If percentage is negative, or it's not requested in <paramref name="elements"/> it will be an empty string.
+    /// If the result would be longer than <paramref name="maxLength"/>, an empty string will be returned.
+    /// </summary>
+    /// <param name="elements">Which elements user wants to be visible in status.</param>
+    /// <param name="maxLength">Space in which the result must fit.</param>
+    /// <returns></returns>
+    public string GetShortPercentString(Elements elements, int maxLength) => GetPercentStringImpl(elements, maxLength, @"0\%");
+
+    /// <summary>
+    /// Formats the percentage to string with given format.
+    /// <para/>
+    /// If percentage is negative, or it's not requested in <paramref name="elements"/> it will be an empty string.
+    /// If the result would be longer than <paramref name="maxLength"/>, an empty string will be returned.
+    /// </summary>
+    /// <param name="elements">Which elements user wants to be visible in status.</param>
+    /// <param name="maxLength">Space in which the result must fit.</param>
+    /// <returns></returns>
+    private string GetPercentStringImpl(Elements elements, int maxLength, string format)
     {
         if (this.Percent < 0 || !elements.HasFlag(Elements.Percentage))
         {
             return string.Empty;
         }
-        string p = this.Percent.ToString(@"00\%", CultureInfo.InvariantCulture);
+        string p = this.Percent.ToString(format, CultureInfo.InvariantCulture);
         if (p.Length > maxLength)
         {
             // can't really trim it
