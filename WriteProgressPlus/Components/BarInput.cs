@@ -23,3 +23,18 @@ internal readonly record struct BarInput
         Visible = visible;
     }
 }
+internal readonly record struct BarOutput
+{
+    public readonly string Status;
+    public readonly string Activity;
+    public readonly int RemainingTime;
+    public readonly int PercentComplete;
+
+    public BarOutput(string activity, string status, int remainingTime, int percentComplete)
+    {
+        Status = status;
+        Activity = activity;
+        RemainingTime = remainingTime;
+        PercentComplete = percentComplete;
+    }
+}

@@ -19,8 +19,8 @@ namespace WriteProgressPlus.Components;
 public readonly record struct Counter
 {
     public const int BarDisabled = -1;
-    public const int BarOverflowed = -100;
-    public const char Separator = '/';
+    //public const int BarOverflowed = -100;
+    public const string Separator = "/";
 
     public readonly int Iteration;
     public readonly int Total;
@@ -44,28 +44,24 @@ public readonly record struct Counter
     {
         get
         {
-            if (Total <= 0 || Iteration < 0)
+            if (this.Total <= 0 || this.Iteration < 0)
             {
-                return BarDisabled;
+                return Counter.BarDisabled;
             }
-            if (Iteration > Total)
-            {
-                return BarOverflowed;
-            }
-            return Total / Iteration;
+            return this.Total / this.Iteration;
         }
     }
 
-    public bool KnownTotal => Total > 0;
+    public bool KnownTotal => this.Total > 0;
 
     public string GetTextForm(Elements elements, int maxLength)
     {
         // [counter_part] ([percent_part])
-        string counterPart = GetCounterString(elements, maxLength);
+        string counterPart = this.GetCounterString(elements, maxLength);
         // if we have a counter part, percents will be in parentheses, after a space
         // otherwise, there will be only percents or nothing
         int percentLengthReserved = counterPart == "" ? counterPart.Length + 3 : 0;
-        string percentPart = GetPercentString(elements, maxLength - percentLengthReserved);
+        string percentPart = this.GetPercentString(elements, maxLength - percentLengthReserved);
 
         string result = (counterPart, percentPart) switch
         {
@@ -81,8 +77,8 @@ public readonly record struct Counter
     }
     public string GetCounterString(Elements elements, int maxLength)
     {
-        bool iterationPresent = elements.HasFlag(Elements.Iteration) && IsIterationProvided;
-        bool totalPresent = elements.HasFlag(Elements.TotalCount) && IsTotalProvided;
+        bool iterationPresent = elements.HasFlag(Elements.Iteration) && this.IsIterationProvided;
+        bool totalPresent = elements.HasFlag(Elements.TotalCount) && this.IsTotalProvided;
         if (!iterationPresent && !totalPresent || maxLength == 0)
         {
             // Neither part of counter is requested (or we don;t have any space)
@@ -93,16 +89,16 @@ public readonly record struct Counter
         string separator = string.Empty;
         if (totalPresent)
         {
-            total = Total.ToString(CultureInfo.InvariantCulture);
+            total = this.Total.ToString(CultureInfo.InvariantCulture);
         }
         if (iterationPresent)
         {
-            iteration = Iteration.ToString(CultureInfo.InvariantCulture);
+            iteration = this.Iteration.ToString(CultureInfo.InvariantCulture);
         }
         if (iterationPresent && totalPresent)
         {
             // if both are present, add a separator
-            separator = "/";
+            separator = Counter.Separator;
         }
         int partLength = Math.Max(total.Length, iteration.Length);
         // possible length includes iteration part padded to at least the width of total count.
@@ -135,12 +131,11 @@ public readonly record struct Counter
 
     public string GetPercentString(Elements elements, int maxLength)
     {
-        int percent = this.Percent;
-        if (percent < 0 || !elements.HasFlag(Elements.Percentage))
+        if (this.Percent < 0 || !elements.HasFlag(Elements.Percentage))
         {
             return string.Empty;
         }
-        string p = percent.ToString(@"00\%", CultureInfo.InvariantCulture);
+        string p = this.Percent.ToString(@"00\%", CultureInfo.InvariantCulture);
         if (p.Length > maxLength)
         {
             // can't really trim it
