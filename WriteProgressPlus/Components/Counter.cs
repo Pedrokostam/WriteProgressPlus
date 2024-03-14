@@ -52,7 +52,7 @@ public readonly record struct Counter
     {
         get
         {
-            if (IsTotalProvided && IsIterationProvided)
+            if (IsTotalProvided && IsIterationProvided && this.Iteration <= this.Total)
             {
                 return this.Iteration * 100 / this.Total;
             }
