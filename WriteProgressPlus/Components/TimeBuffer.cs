@@ -50,12 +50,17 @@ public class TimeBuffer
         _timeEntries[0] = new TimeEntry(DateTime.MinValue, int.MinValue);
     }
     /// <summary>
-    /// Adds current datetime to time buffer.
+    /// Adds current datetime and given iteration to time buffer.
     /// </summary>
     public void AddTime(int iteration) => AddTime(new TimeEntry(DateTime.UtcNow, iteration));
 
     /// <summary>
-    /// Adds given datetime to time buffer.
+    /// Adds given datetime and iteration to time buffer.
+    /// </summary>
+    public void AddTime(DateTime time, int iteration) => AddTime(new TimeEntry(time, iteration));
+
+    /// <summary>
+    /// Adds given datetime and iteration to time buffer.
     /// </summary>
     public void AddTime(TimeEntry entry)
     {
