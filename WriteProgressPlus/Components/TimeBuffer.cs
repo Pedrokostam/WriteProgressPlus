@@ -47,6 +47,7 @@ public class TimeBuffer
     {
         MaxLength = Math.Min(Math.Max(MinCalculationLength, calculationLength), MaxCalculationLength);
         _timeEntries = new TimeEntry[MaxLength];
+        _timeEntries[0] = new TimeEntry(DateTime.MinValue, int.MinValue);
     }
     /// <summary>
     /// Adds current datetime to time buffer.
@@ -103,7 +104,37 @@ public class TimeBuffer
             return Negative;
         }
         TimeSpan timeSpan = LatestTimeEntry.Time - OldestTimeEntry.Time;
-        var timePerIterationMilliseconds = timeSpan.TotalMilliseconds / iterationSpan;
-        return TimeSpan.FromMilliseconds(timePerIterationMilliseconds);
+        var timePerIterationMilliseconds = timeSpan.TotalSeconds / iterationSpan;
+        return TimeSpan.FromSeconds(timePerIterationMilliseconds);
+    }
+
+#if DEBUG
+    public TimeSpan[] DiagTimespans
+    {
+        get
+        {
+            var min = _timeEntries.Min(x => x.Time);
+            return _timeEntries.Select(x => x.Time - min).OrderBy(x => x.Ticks).ToArray();
+        }
+    }
+#endif
+    public void x(TimeSpan t, int divisor)
+    {
+        Console.WriteLine("{0} -- {1}", t, t.Ticks);
+        long temp;
+        temp = TimeSpan.FromDays(t.TotalDays / divisor).Ticks;
+        Console.WriteLine("   Days: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromHours(t.TotalHours / divisor).Ticks;
+        Console.WriteLine("  Hours: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromMinutes(t.TotalMinutes / divisor).Ticks;
+        Console.WriteLine("Minutes: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromSeconds(t.TotalSeconds / divisor).Ticks;
+        Console.WriteLine("Seconds: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromMilliseconds(t.TotalMilliseconds / divisor).Ticks;
+        Console.WriteLine(" Millis: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromTicks(t.Ticks / divisor).Ticks;
+        Console.WriteLine("TickLon: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromTicks((long)((double)t.Ticks / divisor)).Ticks;
+        Console.WriteLine("TickDou: {0} - {1}", temp, t.Ticks - temp);
     }
 }

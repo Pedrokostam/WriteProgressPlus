@@ -1,7 +1,9 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
 namespace WriteProgressPlus.Components;
 
 [StructLayout(LayoutKind.Auto)]
+[DebuggerDisplay("{Time} - {Iteration}")]
 public readonly record struct TimeEntry
 {
     public readonly DateTime Time;
