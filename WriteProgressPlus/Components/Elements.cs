@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace WriteProgressPlus.Components;
+
+/// <summary>
+/// Parts that can be displayed in a progress bar.0
+/// </summary>
 [Flags]
 public enum Elements
 {
