@@ -99,7 +99,6 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
                 );
             ThrowTerminatingError(errorRecord);
         }
-
         ID += Offset;
         ParentID += Offset;
 

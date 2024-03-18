@@ -1,5 +1,7 @@
-﻿using System.Management.Automation;
+﻿using System.Diagnostics;
+using System.Management.Automation;
 using System.Text;
+using System.Text.RegularExpressions;
 using static System.Globalization.CultureInfo;
 using static WriteProgressPlus.Components.PowershellVersionDifferences;
 
@@ -10,6 +12,15 @@ internal sealed class ProgressState
     private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
 
     private readonly string Placeholder = "placeholder";
+
+    /// <summary>
+    /// Value that needs to be passed to Write-Progress to hide/disable progress bar.
+    /// </summary>
+    private const int ProgressBarDisabled = -1;
+    /// <summary>
+    /// A number smaller than <see cref="ProgressBarDisabled"/>
+    /// </summary>
+    private const int Overflow = -100;
 
     public ProgressState(WriteProgressPlusCommand donor)
     {
@@ -105,128 +116,68 @@ internal sealed class ProgressState
         return Keeper.UpdatedPermitted();
     }
 
-    /// <summary>
-    /// Calculate percent done using donor's TotalCount and <see cref="ActualCurrentIteration"/>.
-    /// </summary>
-    /// <param name="donor"></param>
-    /// <returns>Tuple with calculated percentage and a flag whether current iteration is greater than total count.</returns>
-    private (int percentage, bool overflow) GetPercentage(WriteProgressPlusCommand donor)
+
+    private Elements GetElements(WriteProgressPlusCommand donor)
     {
-        int percentage;
-        bool overflow = false;
-        if (donor.TotalCount > 0)
+        Elements elements = Elements.All;
+        if (donor.NoETA)
         {
-            percentage = ActualCurrentIteration * 100 / donor.TotalCount;
-            if (percentage > 100)
-            {
-                overflow = true;
-                percentage = 100;
-            }
+            elements &= ~Elements.TimeRemaining;
         }
-        else // No TotalCount means we cannot calculate percentage
+        if (donor.NoCounter)
         {
-            percentage = 0;
+            elements &= ~(Elements.Counter);
         }
-        return (percentage, overflow);
+        if (donor.NoPercentage)
+        {
+            elements &= ~Elements.Percentage;
+        }
+        if (donor.HideObject)
+        {
+            elements &= ~(Elements.ItemScript | Elements.ItemProperties);
+        }
+        return elements;
     }
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
+        (Size buffer, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
+        Debug.WriteLine(buffer);
         StatusBuilder.Clear();
         StartNewIteration(donor);
-        (int percentage, bool overflow) = GetPercentage(donor);
-        AppendFormattedItem(donor, percentage);
-        AppendCounter(donor);
-        AppendPercentage(donor, percentage, overflow);
+        var visibleElements = GetElements(donor);
+        var counter = new Counter(ActualCurrentIteration, donor.TotalCount);
+        var formattedItem = GetFormattedItem(donor, counter.Percent);
         int remainingSeconds = GetRemainingSeconds(donor);
-        UpdateAssociatedRecord(donor, percentage, remainingSeconds);
+        var input = new BarInput(formattedItem,counter,donor.Activity, remainingSeconds, buffer, visibleElements);
+        BarOutput output = ViewFormatter.FormatView(input, isViewMinimal);
+        UpdateAssociatedRecord(output, donor.ParentID);
     }
 
-    private void UpdateAssociatedRecord(WriteProgressPlusCommand donor, int percentage, int remainingSeconds)
+    private void UpdateAssociatedRecord(BarOutput output,int parentID)
     {
-        AssociatedRecord.StatusDescription = StatusBuilder.ToString();
+        AssociatedRecord.StatusDescription = output.Status;
         AssociatedRecord.RecordType = ProgressRecordType.Processing;
-        AssociatedRecord.Activity = donor.Activity;
-        AssociatedRecord.SecondsRemaining = remainingSeconds;
-        AssociatedRecord.ParentActivityId = donor.ParentID >= ProgressBaseCommand.Offset ? donor.ParentID : -1;
-        AssociatedRecord.PercentComplete = percentage;
+        AssociatedRecord.Activity = output.Activity;
+        AssociatedRecord.SecondsRemaining = output.RemainingTime;
+        AssociatedRecord.ParentActivityId = parentID >= ProgressBaseCommand.Offset ? parentID : -1;
+        AssociatedRecord.PercentComplete = output.PercentComplete;
+        AssociatedRecord.CurrentOperation = output.CurrentOperation;
     }
 
-    /// <summary>
-    /// Appends percent done: {d2}% or [Incorrect total count] depending on overflow.
-    /// <para/>
-    /// Skips if donor has at least one of the following:
-    /// <list type="bullet">
-    ///     <item>
-    ///         Negative <see cref="WriteProgressPlusCommand.TotalCount"/>
-    ///     </item>
-    ///     <item>
-    ///         Present <see cref="WriteProgressPlusCommand.NoPercentage"/>
-    ///     </item>
-    /// </list>
-    /// </summary>
-    /// <param name="donor"></param>
-    /// <param name="percentage"></param>
-    /// <param name="overflow"></param>
-    private void AppendPercentage(WriteProgressPlusCommand donor, int percentage, bool overflow)
-    {
-        if (donor.TotalCount <= 0 || donor.NoPercentage)
-        {
-            return;
-        }
-
-        if (overflow)
-        {
-            StatusBuilder.Append("[Incorrect total count]");
-        }
-        else
-        {
-            StatusBuilder.AppendFormat(InvariantCulture, "{0:d2}%", percentage);
-        }
-    }
-
-    /// <summary>
-    /// Appends counter: (current / total) or (current).
-    /// </summary>
-    /// <param name="donor"></param>
-    private void AppendCounter(WriteProgressPlusCommand donor)
-    {
-        if (donor.NoCounter)
-        {
-            return;
-        }
-
-        StatusBuilder.AppendFormat(InvariantCulture, "{0:d3}", ActualCurrentIteration);
-        if (donor.TotalCount > 0) // append the total
-        {
-            StatusBuilder.Append('/').Append(donor.TotalCount);
-        }
-        StatusBuilder.Append(' '); // space for possible next parts
-    }
-
-    /// <summary>
-    /// Appends the formatted (either from properties or from script).
-    /// </summary>
-    /// <param name="donor"></param>
-    /// <param name="percentage">Percent done to be used as one of four script parameters.</param>
-    private void AppendFormattedItem(WriteProgressPlusCommand donor, int percentage)
+    private string? GetFormattedItem(WriteProgressPlusCommand donor, int percentage)
     {
         // object hidden or null - skip
         if (donor.HideObject || donor.InputObject is null)
         {
-            return;
+            return null;
         }
         object[] package = [donor.InputObject, ActualCurrentIteration, percentage, donor.TotalCount];
         if (donor.Formatter.FormatItem(package) is string formatted)
         {
-            StatusBuilder.Append(formatted);
-            bool statusHasOnlyItem = donor.NoPercentage.IsPresent && donor.NoCounter.IsPresent;
-            // If there's more than object part in status - append a dash
-            if (!statusHasOnlyItem)
-            {
-                StatusBuilder.Append(" - ");
-            }
+            return formatted;
         }
+        return null;
     }
 
     /// <summary>
@@ -239,7 +190,8 @@ internal sealed class ProgressState
         int remainingSeconds = -1;
         if (!donor.NoETA && donor.TotalCount > 0)
         {
-            remainingSeconds = (int)GetRemainingTime(donor.TotalCount).TotalSeconds;
+            var temp = GetRemainingTime(donor.TotalCount).TotalSeconds;
+            remainingSeconds = temp > int.MaxValue ? int.MaxValue : (int)temp;
         }
 
         return remainingSeconds;
