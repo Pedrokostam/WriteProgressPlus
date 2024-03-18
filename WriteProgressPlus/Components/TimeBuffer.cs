@@ -71,7 +71,7 @@ public class TimeBuffer
         // that the first actual element won't be skipped due to having the same value.
         // P.S. No need to set every element of the array, as the only public way to add an element is through AddTime
         // which will always start at zero.
-        _timeEntries[0] = new TimeEntry(DateTime.MinValue, int.MinValue);
+        _timeEntries[0] = TimeEntry.MinValue;
 
     }
     /// <summary>
