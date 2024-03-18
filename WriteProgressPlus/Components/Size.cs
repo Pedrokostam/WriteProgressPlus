@@ -2,6 +2,9 @@
 
 namespace WriteProgressPlus.Components;
 
+/// <summary>
+/// Simple width/height struct to avoid having to instantiate <see cref="System.Management.Automation.Host.Size"/> while being equivalent.
+/// </summary>
 [StructLayout(LayoutKind.Auto)]
 internal readonly record struct Size
 {
