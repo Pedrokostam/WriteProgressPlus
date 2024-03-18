@@ -69,7 +69,7 @@ internal sealed class ProgressState
             // Negative iteration means we need to calculate it from increment
             _ => ActualCurrentIteration + donor.Increment,
         };
-        Keeper.AddTime();
+        Keeper.AddTime(ActualCurrentIteration);
     }
 
     /// <summary>

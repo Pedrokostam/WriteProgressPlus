@@ -1,13 +1,13 @@
 ﻿using System.Collections.ObjectModel;
-
 namespace WriteProgressPlus.Components;
 
 /// <summary>
 /// Simple implementation of a circular buffer.
-/// Stores recent TimeSpans and can calculate moving average.
+/// Stores recent TimeEntries and can calculate moving average.
 /// </summary>
 public class TimeBuffer
 {
+    private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
     /// <summary>
     /// Upper limit to avoid having too large buffers.
     /// </summary>
@@ -18,7 +18,7 @@ public class TimeBuffer
     /// </summary>
     public static readonly int MinCalculationLength = 50;
 
-    private readonly TimeSpan[] timeSpans;
+    private readonly TimeEntry[] _timeEntries;
 
     private DateTime LastDataPoint = DateTime.MinValue;
 
@@ -30,47 +30,68 @@ public class TimeBuffer
     private int CurrentIndex = 0;
 
     /// <summary>
+    /// Where to the LAST element was put.
+    /// </summary>
+    private int LatestIndex = 0;
+    private int OldestIndex = 0;
+
+    /// <summary>
     /// Where to put the NEXT element.
     /// </summary>
     private int InsertionIndex => CurrentIndex % MaxLength;
 
+    private TimeEntry LatestTimeEntry => _timeEntries[LatestIndex];
+    private TimeEntry OldestTimeEntry => _timeEntries[OldestIndex];
+
     public TimeBuffer(int calculationLength)
     {
         MaxLength = Math.Min(Math.Max(MinCalculationLength, calculationLength), MaxCalculationLength);
-        timeSpans = new TimeSpan[MaxLength];
+        _timeEntries = new TimeEntry[MaxLength];
+        _timeEntries[0] = new TimeEntry(DateTime.MinValue, int.MinValue);
     }
     /// <summary>
-    /// Adds current datetime to time buffer.
+    /// Adds current datetime and given iteration to time buffer.
     /// </summary>
-    public void AddTime() => AddTime(DateTime.Now);
+    public void AddTime(int iteration) => AddTime(new TimeEntry(DateTime.UtcNow, iteration));
 
     /// <summary>
-    /// Adds given datetime to time buffer.
+    /// Adds given datetime and iteration to time buffer.
     /// </summary>
-    public void AddTime(DateTime time)
+    public void AddTime(DateTime time, int iteration) => AddTime(new TimeEntry(time, iteration));
+
+    /// <summary>
+    /// Adds given datetime and iteration to time buffer.
+    /// </summary>
+    public void AddTime(TimeEntry entry)
     {
-        //If LastDataPoint is at its starting value, instead of adding time to the buffer, set LastDataPoint to its value.
-        if (LastDataPoint == DateTime.MinValue)
+        if (_timeEntries[LatestIndex].Iteration == entry.Iteration)
         {
-            LastDataPoint = time;
+            // If the iteration of new entry is the same as the latest entriy's, do not add it.
+            return;
         }
-        else
+        _timeEntries[InsertionIndex] = entry;
+        LatestIndex = InsertionIndex;
+
+        CurrentIndex++;
+
+        // if CurrentIndex exceeds length of the array
+        // the next element will overwrite something
+        // so the oldest index should become InsertionIndex
+        if (CurrentIndex > MaxLength)
         {
-            timeSpans[InsertionIndex] = time - LastDataPoint;
-            LastDataPoint = time;
-            CurrentIndex++;
+            OldestIndex = InsertionIndex;
         }
     }
 
-    public ICollection<TimeSpan> TimeSpans
+    public ICollection<TimeEntry> TimeEntries
     {
         get
         {
             if (CurrentIndex < MaxLength)
             {
-                return timeSpans.Take(CurrentIndex).ToList();
+                return _timeEntries.Take(CurrentIndex).ToList();
             }
-            return new ReadOnlyCollection<TimeSpan>(timeSpans);
+            return new ReadOnlyCollection<TimeEntry>(_timeEntries);
         }
     }
 
@@ -80,22 +101,45 @@ public class TimeBuffer
     /// <returns></returns>
     public TimeSpan CalculateMovingAverageTime()
     {
-        // If we haven't filled the whole buffer, take only until CurrentIndex,
-        // otherwise take the whole length
-        int end = CurrentIndex < MaxLength ? CurrentIndex : MaxLength;
-        if (end == 0)
+        var iterationSpan = LatestTimeEntry.Iteration - OldestTimeEntry.Iteration;
+        if (iterationSpan <= 0)
         {
-            // Won't be able to divide by zero
-            return TimeSpan.Zero;
+            // Nothing to calculate, since we have not proceeded with iteration.
+            // Or we have negative iteration, which is worse.
+            return Negative;
         }
+        TimeSpan timeSpan = LatestTimeEntry.Time - OldestTimeEntry.Time;
+        var timePerIterationMilliseconds = timeSpan.TotalSeconds / iterationSpan;
+        return TimeSpan.FromSeconds(timePerIterationMilliseconds);
+    }
 
-        long tickSum = 0;
-        for (int i = 0; i < end; i++)
+#if DEBUG
+    public TimeSpan[] DiagTimespans
+    {
+        get
         {
-            tickSum += timeSpans[i].Ticks;
+            var min = _timeEntries.Min(x => x.Time);
+            return _timeEntries.Select(x => x.Time - min).OrderBy(x => x.Ticks).ToArray();
         }
-        long tickMean = tickSum / end;
-        
-        return TimeSpan.FromTicks(tickMean);
+    }
+#endif
+    public void x(TimeSpan t, int divisor)
+    {
+        Console.WriteLine("{0} -- {1}", t, t.Ticks);
+        long temp;
+        temp = TimeSpan.FromDays(t.TotalDays / divisor).Ticks;
+        Console.WriteLine("   Days: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromHours(t.TotalHours / divisor).Ticks;
+        Console.WriteLine("  Hours: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromMinutes(t.TotalMinutes / divisor).Ticks;
+        Console.WriteLine("Minutes: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromSeconds(t.TotalSeconds / divisor).Ticks;
+        Console.WriteLine("Seconds: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromMilliseconds(t.TotalMilliseconds / divisor).Ticks;
+        Console.WriteLine(" Millis: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromTicks(t.Ticks / divisor).Ticks;
+        Console.WriteLine("TickLon: {0} - {1}", temp, t.Ticks - temp);
+        temp = TimeSpan.FromTicks((long)((double)t.Ticks / divisor)).Ticks;
+        Console.WriteLine("TickDou: {0} - {1}", temp, t.Ticks - temp);
     }
 }
