@@ -32,7 +32,7 @@ public class TimeBufferTests
     public void TestReplacement(int length)
     {
         var buff = new TimeBuffer(length);
-        length = buff.MaxLength;
+        length = buff.BufferLength;
         int i;
         for (i = 0; i < length; i++)
         {
@@ -81,7 +81,7 @@ public class TimeBufferTests
     public void TestValueReplacing(int inputLength, int calculationLength)
     {
         var buff = new TimeBuffer(calculationLength);
-        calculationLength = buff.MaxLength;
+        calculationLength = buff.BufferLength;
         DateTime date = DateTime.Now;
         var range = Enumerable.Range(1, inputLength).ToArray();
         foreach (var item in range)

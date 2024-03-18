@@ -7,22 +7,31 @@ namespace WriteProgressPlus.Components;
 /// </summary>
 public class TimeBuffer
 {
-    private readonly TimeSpan Negative = TimeSpan.FromSeconds(-1);
+    /// <summary>
+    /// Value returned when calculation is not possible.
+    /// -1 second is understood by WriteProgress as no time remaining specified.
+    /// </summary>
+    private readonly TimeSpan FallbackValue = TimeSpan.FromSeconds(-1);
+
     /// <summary>
     /// Upper limit to avoid having too large buffers.
     /// </summary>
     public static readonly int MaxCalculationLength = 5000;
 
     /// <summary>
-    /// Lower limit to avoid having too large buffers.
+    /// Lower limit to avoid having too small buffers.
     /// </summary>
     public static readonly int MinCalculationLength = 50;
 
+    /// <summary>
+    /// Actual container for data.
+    /// </summary>
     private readonly TimeEntry[] _timeEntries;
-
-    private DateTime LastDataPoint = DateTime.MinValue;
-
-    public int MaxLength { get; }
+    
+    /// <summary>
+    /// How many elements the buffer can store.
+    /// </summary>
+    public int BufferLength => _timeEntries.Length;
 
     /// <summary>
     /// How many elements were inserted.
@@ -30,24 +39,40 @@ public class TimeBuffer
     private int CurrentIndex = 0;
 
     /// <summary>
-    /// Where to the LAST element was put.
+    /// Where the LATEST element was put.
     /// </summary>
     private int LatestIndex = 0;
+
+    /// <summary>
+    /// Where the OLDEST element was put.
+    /// </summary>
     private int OldestIndex = 0;
 
     /// <summary>
     /// Where to put the NEXT element.
     /// </summary>
-    private int InsertionIndex => CurrentIndex % MaxLength;
+    private int InsertionIndex => CurrentIndex % BufferLength;
 
+    /// <summary>
+    /// Most recent time entry.
+    /// </summary>
     private TimeEntry LatestTimeEntry => _timeEntries[LatestIndex];
+
+    /// <summary>
+    /// Least recent time entry still in buffer.
+    /// </summary>
     private TimeEntry OldestTimeEntry => _timeEntries[OldestIndex];
 
     public TimeBuffer(int calculationLength)
     {
-        MaxLength = Math.Min(Math.Max(MinCalculationLength, calculationLength), MaxCalculationLength);
-        _timeEntries = new TimeEntry[MaxLength];
+        var bufferLength = Math.Min(Math.Max(MinCalculationLength, calculationLength), MaxCalculationLength);
+        _timeEntries = new TimeEntry[bufferLength];
+        // set the first element to a non-natural value - this will make sure
+        // that the first actual element won't be skipped due to having the same value.
+        // P.S. No need to set every element of the array, as the only public way to add an element is through AddTime
+        // which will always start at zero.
         _timeEntries[0] = new TimeEntry(DateTime.MinValue, int.MinValue);
+
     }
     /// <summary>
     /// Adds current datetime and given iteration to time buffer.
@@ -77,17 +102,18 @@ public class TimeBuffer
         // if CurrentIndex exceeds length of the array
         // the next element will overwrite something
         // so the oldest index should become InsertionIndex
-        if (CurrentIndex > MaxLength)
+        if (CurrentIndex > BufferLength)
         {
             OldestIndex = InsertionIndex;
         }
     }
 
+    // Public view of buffer, limited to non-empty elements.
     public ICollection<TimeEntry> TimeEntries
     {
         get
         {
-            if (CurrentIndex < MaxLength)
+            if (CurrentIndex < BufferLength)
             {
                 return _timeEntries.Take(CurrentIndex).ToList();
             }
@@ -106,40 +132,10 @@ public class TimeBuffer
         {
             // Nothing to calculate, since we have not proceeded with iteration.
             // Or we have negative iteration, which is worse.
-            return Negative;
+            return FallbackValue;
         }
         TimeSpan timeSpan = LatestTimeEntry.Time - OldestTimeEntry.Time;
         var timePerIterationMilliseconds = timeSpan.TotalSeconds / iterationSpan;
         return TimeSpan.FromSeconds(timePerIterationMilliseconds);
-    }
-
-#if DEBUG
-    public TimeSpan[] DiagTimespans
-    {
-        get
-        {
-            var min = _timeEntries.Min(x => x.Time);
-            return _timeEntries.Select(x => x.Time - min).OrderBy(x => x.Ticks).ToArray();
-        }
-    }
-#endif
-    public void x(TimeSpan t, int divisor)
-    {
-        Console.WriteLine("{0} -- {1}", t, t.Ticks);
-        long temp;
-        temp = TimeSpan.FromDays(t.TotalDays / divisor).Ticks;
-        Console.WriteLine("   Days: {0} - {1}", temp, t.Ticks - temp);
-        temp = TimeSpan.FromHours(t.TotalHours / divisor).Ticks;
-        Console.WriteLine("  Hours: {0} - {1}", temp, t.Ticks - temp);
-        temp = TimeSpan.FromMinutes(t.TotalMinutes / divisor).Ticks;
-        Console.WriteLine("Minutes: {0} - {1}", temp, t.Ticks - temp);
-        temp = TimeSpan.FromSeconds(t.TotalSeconds / divisor).Ticks;
-        Console.WriteLine("Seconds: {0} - {1}", temp, t.Ticks - temp);
-        temp = TimeSpan.FromMilliseconds(t.TotalMilliseconds / divisor).Ticks;
-        Console.WriteLine(" Millis: {0} - {1}", temp, t.Ticks - temp);
-        temp = TimeSpan.FromTicks(t.Ticks / divisor).Ticks;
-        Console.WriteLine("TickLon: {0} - {1}", temp, t.Ticks - temp);
-        temp = TimeSpan.FromTicks((long)((double)t.Ticks / divisor)).Ticks;
-        Console.WriteLine("TickDou: {0} - {1}", temp, t.Ticks - temp);
     }
 }

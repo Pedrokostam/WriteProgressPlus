@@ -77,7 +77,7 @@ internal sealed class ProgressState
         {
             // Non-negative iteration means it was specified by user
             >= 0 => donor.CurrentIteration,
-            // Negative iteration means we need to calculate it from increment
+            // FallbackValue iteration means we need to calculate it from increment
             _ => ActualCurrentIteration + donor.Increment,
         };
         Keeper.AddTime(ActualCurrentIteration);
