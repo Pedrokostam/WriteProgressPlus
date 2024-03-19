@@ -30,7 +30,19 @@
     Copyright          = '(c) Maciej Krosta. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description        = 'Extension of the standard WriteProgress, which simplifies control, automates its functionalities and extends its capabilities, including support for in-pipeline placement. Write-ProgressPlus is a cmdlet can calculate remaining time, track current iteration and calculate percentage, preserve state across commands and automatically create status message.'
+    Description        = @'
+Extension of the standard WriteProgress, which simplifies control, automates its functionalities and extends its capabilities, including support for in-pipeline placement.
+
+Functionalities of this module include:
+- Updating progress bars directly from pipeline (without having to use ForEach-Object).
+- Keeping track of current iteration automatically (with specified increment).
+- Automatic calculation of percent done and time remaining (when provided total count).
+- Option to include current iteration, total count and percent done in Status message.
+- Ability to provide current object to be displayed in Status or CurrentOperation (item format can be customized).
+- Support for both classic and minimal style of progress bar.
+- State of progress bar can be kept between commands or cleared, depending on requirements.
+- Support for child progress bars.
+'@
 
     # Minimum version of the PowerShell engine required by this module
     PowerShellVersion  = '3.0'

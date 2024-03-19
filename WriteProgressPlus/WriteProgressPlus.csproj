@@ -8,10 +8,10 @@
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<OutputType>Library</OutputType>
 		<Authors>Maciej Krosta</Authors>
-		<Version>1.1.0</Version>
+		<Version>1.2.0</Version>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
-		<Description>Wrapper around WriteProgress, which automates its functionalities and allows simpler control.</Description>
+		<Description>Simplifies using Write-Progress: automates time and percentage calculations; enables pipeline support.</Description>
 		<Copyright>Maciej Krosta</Copyright>
 		<PackageProjectUrl>https://github.com/Pedrokostam/WriteProgressPlus</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Pedrokostam/WriteProgressPlus</RepositoryUrl>
