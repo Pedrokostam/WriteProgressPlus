@@ -164,7 +164,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
 
     public object? GetDynamicParameters()
     {
-        if (IsThrottlingBuiltIn(CommandRuntime))
+        if (IsThrottlingBuiltIn(SessionState))
         {
             return null;
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management.Automation;
@@ -21,17 +22,22 @@ internal static class PowershellVersionDifferences
     /// (I assume, that no-one would be using pre-alpha18 Powershell 6 anymore).
     /// <para/>
     /// While it won't really be a problem, if the cmdlet does an additional throttling,
-    /// for performance and simplicity reasons it'dynamicStopwatch better to skip it, where applicable.
+    /// for performance and simplicity reasons it's better to skip it, where applicable.
     /// </summary>
     /// <param name="runtime"></param>
     /// <returns>If host has built-in throttling - <see langword="true"/>. Otherwise - <see langword="false"/></returns>
-    public static bool IsThrottlingBuiltIn(ICommandRuntime runtime)
+    public static bool IsThrottlingBuiltIn(SessionRuntime sessionRuntime)
     {
-        var runtimeVersion = runtime.Host.Version;
-        // The throttling applies only to ConsoleHost, as far as I am aware, so better make sure it matches.
-        var runtimeName = runtime.Host.Name;
-        return runtimeName is "ConsoleHost" && runtimeVersion >= ThrottlingVersion;
+        var versionTable = sessionRuntime.GetVariable<Hashtable>("PSVersionTable")!;
+        // Only checking if the version of PowerShell is after throttling was introduced.
+        // theoretically throttling is tied to ConsoleHost, and it is possible to implement it on its own (citation needed)
+        // but for now I am going to assume that checking the version is all that is needed
+        return (Version)versionTable["PSVersion"] >= ThrottlingVersion;
     }
+
+    /// <param name="state">SessionState used to get variable for PSVersionTable - will be wrapped to SessionRuntime with null CommandRuntime.</param>
+    /// <inheritdoc cref="IsThrottlingBuiltIn(SessionRuntime)"/>
+    public static bool IsThrottlingBuiltIn(SessionState state) => IsThrottlingBuiltIn(new SessionRuntime(state, null!));
 
     /// <summary>
     /// Minimal view for progress bar was introduced in PowerShell 7.2.0, along with the PSStyle automatic variable (and its class)

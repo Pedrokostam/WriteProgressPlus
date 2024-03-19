@@ -13,15 +13,6 @@ internal sealed class ProgressState
 
     private readonly string Placeholder = "placeholder";
 
-    /// <summary>
-    /// Value that needs to be passed to Write-Progress to hide/disable progress bar.
-    /// </summary>
-    private const int ProgressBarDisabled = -1;
-    /// <summary>
-    /// A number smaller than <see cref="ProgressBarDisabled"/>
-    /// </summary>
-    private const int Overflow = -100;
-
     public ProgressState(WriteProgressPlusCommand donor)
     {
         Id = donor.ID;
@@ -34,8 +25,9 @@ internal sealed class ProgressState
         AssociatedRecord = new ProgressRecord(donor.ID, Placeholder, Placeholder);
 
         // try to reuse parentRuntime
-        ICommandRuntime? parentRuntime = ParentId > 0 ? ProgressBaseCommand.ProgressDict[ParentId].CmdRuntime : null;
-        CmdRuntime = parentRuntime ?? donor.CommandRuntime;
+        SessionRuntime? parentSessionRuntime = ParentId > 0 ? ProgressBaseCommand.ProgressDict[ParentId].SessionRuntime : null;
+        SessionRuntime = parentSessionRuntime ?? new SessionRuntime(
+            donor.SessionState, donor.CommandRuntime);
 
         HistoryId = donor.HistoryId;
     }
@@ -46,7 +38,9 @@ internal sealed class ProgressState
     /// I found no other way to make sure that progress bar are reused,
     /// other than using the same CommandRuntime that was used to create it.
     /// </summary>
-    public ICommandRuntime CmdRuntime { get; }
+    private ICommandRuntime CmdRuntime => SessionRuntime.CommandRuntime;
+
+    public SessionRuntime SessionRuntime { get; }
 
     public int Id { get; }
 
@@ -108,7 +102,7 @@ internal sealed class ProgressState
 
     public bool ShouldUpdate()
     {
-        if (IsThrottlingBuiltIn(CmdRuntime))
+        if (IsThrottlingBuiltIn(SessionRuntime))
         {
             // The updates may be very frequent, but the built-in throttling will handle it.
             return true;
@@ -149,12 +143,12 @@ internal sealed class ProgressState
         var counter = new Counter(ActualCurrentIteration, donor.TotalCount);
         var formattedItem = GetFormattedItem(donor, counter.Percent);
         int remainingSeconds = GetRemainingSeconds(donor);
-        var input = new BarInput(formattedItem,counter,donor.Activity, remainingSeconds, buffer, visibleElements);
+        var input = new BarInput(formattedItem, counter, donor.Activity, remainingSeconds, buffer, visibleElements);
         BarOutput output = ViewFormatter.FormatView(input, isViewMinimal);
         UpdateAssociatedRecord(output, donor.ParentID);
     }
 
-    private void UpdateAssociatedRecord(BarOutput output,int parentID)
+    private void UpdateAssociatedRecord(BarOutput output, int parentID)
     {
         AssociatedRecord.StatusDescription = output.Status;
         AssociatedRecord.RecordType = ProgressRecordType.Processing;
