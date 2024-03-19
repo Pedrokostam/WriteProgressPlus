@@ -11,7 +11,7 @@
 		<Version>1.2.0</Version>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
-		<Description>Simplifies using Write-Progress: automates time and percentage calculations; enables pipeline support.</Description>
+		<Description>Module that simplifies using the Write-Progress cmdlet in PowerShell: automates time and percentage calculations; enables pipeline support.</Description>
 		<Copyright>Maciej Krosta</Copyright>
 		<PackageProjectUrl>https://github.com/Pedrokostam/WriteProgressPlus</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Pedrokostam/WriteProgressPlus</RepositoryUrl>
