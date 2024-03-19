@@ -5,12 +5,17 @@ using System.Globalization;
 using System.Text;
 
 namespace WriteProgressPlus.Components;
+
+/// <summary>
+/// Contains method that prepare date for given progress bar view style.
+/// </summary>
 public static class ViewFormatter
 {
     /// <summary>
     /// String used to denote the string has been truncated.
     /// </summary>
     private static readonly string CutOff = "~";
+
     private static string FitString(string s, int maxLenth)
     {
         if (maxLenth <= 1)
@@ -25,6 +30,7 @@ public static class ViewFormatter
         }
         return s.Substring(0, maxLenth - CutOff.Length) + CutOff;
     }
+
     internal static BarOutput FormatMinimalView(BarInput input)
     {
         int maxActivityPartWidth = input.LineWidth / 2; // half, inclusive
@@ -149,7 +155,7 @@ public static class ViewFormatter
     }
 
     /// <summary>
-    /// Creates a BarOutput for the current style of progress bar.
+    /// Creates a BarOutput for the current view style of progress bar.
     /// </summary>
     /// <param name="input"></param>
     /// <param name="isViewMinimal"></param>
@@ -158,11 +164,13 @@ public static class ViewFormatter
     {
         if (isViewMinimal)
         {
+            // Minimal view overrides others.
             Debug.WriteLine("MINIMAL");
             return FormatMinimalView(input);
         }
         if (input.LineHeight > 17)
         {
+            // Most common for PowerShell 5
             Debug.WriteLine("FULL CLASSIC");
             return FormatClassicFullView(input);
         }

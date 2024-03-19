@@ -4,6 +4,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 
 namespace WriteProgressPlus.Components;
+
+/// <summary>
+/// All inputs needed to populate a progress bar with data.
+/// </summary>
 internal readonly record struct BarInput
 {
     public readonly string FormattedItem;
