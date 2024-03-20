@@ -11,6 +11,7 @@ internal static class PowershellVersionDifferences
 {
     private static readonly Version ThrottlingVersion = new Version(6, 0, 0);
     private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
+
     /// <summary>
     /// Since Powershell 6 ConsoleHost will automatically throttle updates to the progress bar.
     /// <para/>
@@ -24,20 +25,20 @@ internal static class PowershellVersionDifferences
     /// While it won't really be a problem, if the cmdlet does an additional throttling,
     /// for performance and simplicity reasons it's better to skip it, where applicable.
     /// </summary>
-    /// <param name="runtime"></param>
+    /// <param name="state">SessionState used to get variable for PSVersionTable.</param>
     /// <returns>If host has built-in throttling - <see langword="true"/>. Otherwise - <see langword="false"/></returns>
-    public static bool IsThrottlingBuiltIn(SessionRuntime sessionRuntime)
+    public static bool IsThrottlingBuiltIn(SessionState state)
     {
-        var versionTable = sessionRuntime.GetVariable<Hashtable>("PSVersionTable")!;
+        var versionTable = state.GetVariable<Hashtable>("PSVersionTable")!;
         // Only checking if the version of PowerShell is after throttling was introduced.
         // theoretically throttling is tied to ConsoleHost, and it is possible to implement it on its own (citation needed)
         // but for now I am going to assume that checking the version is all that is needed
-        return (Version)versionTable["PSVersion"] >= ThrottlingVersion;
+        dynamic version = versionTable["PSVersion"];
+        // PSVersion can either be a Version or a SemanticVersion (introduced is PowerShell SDK 7)
+        // PowerShell 5 SDK does not have this, so we have to use dynamic objects
+        // We can get away with checking just the major version
+        return version.Major >= ThrottlingVersion.Major;
     }
-
-    /// <param name="state">SessionState used to get variable for PSVersionTable - will be wrapped to SessionRuntime with null CommandRuntime.</param>
-    /// <inheritdoc cref="IsThrottlingBuiltIn(SessionRuntime)"/>
-    public static bool IsThrottlingBuiltIn(SessionState state) => IsThrottlingBuiltIn(new SessionRuntime(state, null!));
 
     /// <summary>
     /// Minimal view for progress bar was introduced in PowerShell 7.2.0, along with the PSStyle automatic variable (and its class)
