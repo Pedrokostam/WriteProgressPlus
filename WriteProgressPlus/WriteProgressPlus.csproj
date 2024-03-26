@@ -21,6 +21,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Update="test_files\interactive.ps1">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="test_files\test.ps1">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management.Automation;
@@ -10,6 +11,7 @@ internal static class PowershellVersionDifferences
 {
     private static readonly Version ThrottlingVersion = new Version(6, 0, 0);
     private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
+
     /// <summary>
     /// Since Powershell 6 ConsoleHost will automatically throttle updates to the progress bar.
     /// <para/>
@@ -21,16 +23,21 @@ internal static class PowershellVersionDifferences
     /// (I assume, that no-one would be using pre-alpha18 Powershell 6 anymore).
     /// <para/>
     /// While it won't really be a problem, if the cmdlet does an additional throttling,
-    /// for performance and simplicity reasons it'dynamicStopwatch better to skip it, where applicable.
+    /// for performance and simplicity reasons it's better to skip it, where applicable.
     /// </summary>
-    /// <param name="runtime"></param>
+    /// <param name="state">SessionState used to get variable for PSVersionTable.</param>
     /// <returns>If host has built-in throttling - <see langword="true"/>. Otherwise - <see langword="false"/></returns>
-    public static bool IsThrottlingBuiltIn(ICommandRuntime runtime)
+    public static bool IsThrottlingBuiltIn(SessionState state)
     {
-        var runtimeVersion = runtime.Host.Version;
-        // The throttling applies only to ConsoleHost, as far as I am aware, so better make sure it matches.
-        var runtimeName = runtime.Host.Name;
-        return runtimeName is "ConsoleHost" && runtimeVersion >= ThrottlingVersion;
+        var versionTable = state.GetVariable<Hashtable>("PSVersionTable")!;
+        // Only checking if the version of PowerShell is after throttling was introduced.
+        // theoretically throttling is tied to ConsoleHost, and it is possible to implement it on its own (citation needed)
+        // but for now I am going to assume that checking the version is all that is needed
+        dynamic version = versionTable["PSVersion"];
+        // PSVersion can either be a Version or a SemanticVersion (introduced is PowerShell SDK 7)
+        // PowerShell 5 SDK does not have this, so we have to use dynamic objects
+        // We can get away with checking just the major version
+        return version.Major >= ThrottlingVersion.Major;
     }
 
     /// <summary>
