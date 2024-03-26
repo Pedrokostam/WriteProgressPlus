@@ -9,7 +9,7 @@
 @{
 
     # Script module or binary module file associated with this manifest.
-    RootModule = 'WriteProgressPlus.dll'
+    #RootModule = 'WriteProgressPlus.dll'
 
     # Version number of this module.
     ModuleVersion      = '0.0.1'
@@ -30,13 +30,25 @@
     Copyright          = '(c) Maciej Krosta. All rights reserved.'
 
     # Description of the functionality provided by this module
-    Description        = 'Extension of the standard WriteProgress, which simplifies control, automates its functionalities and extends its capabilities, including support for in-pipeline placement. Write-ProgressPlus is a cmdlet can calculate remaining time, track current iteration and calculate percentage, preserve state across commands and automatically create status message.'
+    Description        = @'
+Extension of the standard WriteProgress, which simplifies control, automates its functionalities and extends its capabilities, including support for in-pipeline placement.
+
+Functionalities of this module include:
+- Updating progress bars directly from pipeline (without having to use ForEach-Object).
+- Keeping track of current iteration automatically (with specified increment).
+- Automatic calculation of percent done and time remaining (when provided total count).
+- Option to include current iteration, total count and percent done in Status message.
+- Ability to provide current object to be displayed in Status or CurrentOperation (item format can be customized).
+- Support for both classic and minimal style of progress bar.
+- State of progress bar can be kept between commands or cleared, depending on requirements.
+- Support for child progress bars.
+'@
 
     # Minimum version of the PowerShell engine required by this module
     PowerShellVersion  = '3.0'
 
     # Name of the PowerShell host required by this module
-    PowerShellHostName = 'ConsoleHost'
+    #PowerShellHostName = 'ConsoleHost' # no need to limit, while it may work.
 
     # Minimum version of the PowerShell host required by this module
     PowerShellHostVersion = '4.0'
@@ -66,19 +78,19 @@
     # FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules      = @()
+    #NestedModules      = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport  = @()
+    #FunctionsToExport  = @()
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    CmdletsToExport    = @('Write-ProgressPlus', 'Reset-ProgressPlus')
+    #CmdletsToExport    = @('Write-ProgressPlus', 'Reset-ProgressPlus')
 
     # Variables to export from this module
-    VariablesToExport  = @()
+    #VariablesToExport  = @()
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    AliasesToExport    = @('WriPro', 'ResPro')
+    #AliasesToExport    = @('WriPro', 'ResPro')
 
     # DSC resources to export from this module
     # DscResourcesToExport = @()

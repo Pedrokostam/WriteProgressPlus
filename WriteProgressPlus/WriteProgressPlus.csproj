@@ -8,10 +8,10 @@
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
 		<OutputType>Library</OutputType>
 		<Authors>Maciej Krosta</Authors>
-		<Version>1.1.0</Version>
+		<Version>1.2.0</Version>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
-		<Description>Wrapper around WriteProgress, which automates its functionalities and allows simpler control.</Description>
+		<Description>Module that simplifies using the Write-Progress cmdlet in PowerShell: automates time and percentage calculations; enables pipeline support.</Description>
 		<Copyright>Maciej Krosta</Copyright>
 		<PackageProjectUrl>https://github.com/Pedrokostam/WriteProgressPlus</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Pedrokostam/WriteProgressPlus</RepositoryUrl>
@@ -21,6 +21,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Update="test_files\interactive.ps1">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
 	  <None Update="test_files\test.ps1">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </None>
@@ -35,11 +38,12 @@
 	    <PrivateAssets>all</PrivateAssets>
 	    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 	  </PackageReference>
+	  <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 	  <PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
 	</ItemGroup>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-	  <Exec Command="pwsh -executionpolicy bypass -file &quot;$(ProjectDir)\build_scripts\postbuild.ps1&quot; -OutputDir $(TargetDir) -Name $(ProjectName) -Version $(Version) -ProjectDir $(ProjectDir)" />
+	  <Exec Command="pwsh -executionpolicy bypass -noprofile -file &quot;$(ProjectDir)\build_scripts\postbuild.ps1&quot; -OutputDir $(TargetDir) -Name $(ProjectName) -Version $(Version) -ProjectDir $(ProjectDir)" />
 	</Target>
 
 </Project>

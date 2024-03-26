@@ -1,4 +1,5 @@
-﻿using Moq;
+﻿using JetBrains.Annotations;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,76 +14,85 @@ namespace WriteProgressPlus.Tests;
 [TestClass]
 public class TimeBufferTests
 {
-    //    / unit test part
-    //Mock<Program> p = new Mock<Program>();
-    //    p.Setup(x => x.GetLastName()).Returns("qqq");
-    public static TimeSpan[] GetTimeSpanArray(int minLength, params long[] tickses)
+    public static TimeSpan[] GetTimeSpanArray(int minLength, params double[] millis)
     {
-        var donorLength = tickses.Length;
+        var donorLength = millis.Length;
         var repeats = (int)Math.Ceiling((double)minLength / donorLength);
-        return Enumerable.Repeat(tickses, repeats)
+        return Enumerable.Repeat(millis, repeats)
             .SelectMany(x => x)
-            .Select(TimeSpan.FromTicks).ToArray();
+            .Select(TimeSpan.FromMilliseconds).ToArray();
     }
-    public static IEnumerable<object?[]> TestRunningAverageTestValues => [
-        [GetTimeSpanArray(0,100),0,0],
-        [GetTimeSpanArray(10,100,90,80,70,110),90,0],
-        [GetTimeSpanArray(10,100,90,80,70,110),90,50],
-        [GetTimeSpanArray(10,100,90,80,70,110),90,150],
-        [GetTimeSpanArray(100,100,90,80,70,110),90,50],
-        [GetTimeSpanArray(100,100,90,80,70,110),90,150],
-        [GetTimeSpanArray(100,100,90,80,70,110),90,0],
 
-        [GetTimeSpanArray(10,21,51,1214,8748,651), 2137, 0],
-        [GetTimeSpanArray(10,21,51,1214,8748,651), 2137, 50],
-        [GetTimeSpanArray(10, 21, 51, 1214, 8748, 651), 2137, 150],
-        [GetTimeSpanArray(100,21,51,1214,8748,651), 2137, 50],
-        [GetTimeSpanArray(100,21,51,1214,8748,651), 2137, 150],
-        [GetTimeSpanArray(100, 21, 51, 1214, 8748, 651),2137,0],
-        ];
-    public static string TestRunningAverageTestValuesDisplayName(MethodInfo methodInfo, object[] data)
+    [DataTestMethod()]
+    [DataRow(0)]
+    [DataRow(10)]
+    [DataRow(100)]
+    [DataRow(1000)]
+    [DataRow(53)]
+    public void TestReplacement(int length)
     {
-        int arrLen = ((TimeSpan[])data[0]).Length;
-        var target = data[1];
-        var calcLen = data[2];
-        return $"{arrLen} values with target {target} and calc length of {calcLen}";
-    }
-    [TestMethod("Running average calculated correctly")]
-    [DynamicData(nameof(TestRunningAverageTestValues), DynamicDataDisplayName = nameof(TestRunningAverageTestValuesDisplayName))]
-    public void TestRunningAverage(TimeSpan[] ts, long targetTicks, int calculationLength)
-    {
-        var buff = new TimeBuffer(calculationLength);
-        DateTime date = DateTime.Now;
-        buff.AddTime(date);
-        foreach (var item in ts)
+        var buff = new TimeBuffer(length);
+        length = buff.BufferLength;
+        int i;
+        for (i = 0; i < length; i++)
         {
-            date += item;
-            buff.AddTime(date);
+            buff.AddTime(new TimeEntry(DateTime.MaxValue, i));
         }
-        Assert.AreEqual(TimeSpan.FromTicks(targetTicks), buff.CalculateMovingAverageTime());
+        var d = DateTime.Now;
+        var d2 = d + TimeSpan.FromMinutes(1) * length;
+        var e1 = new TimeEntry(d, length + 1);
+        var e2 = new TimeEntry(d2, e1.Iteration + length - 1);
+        buff.AddTime(e1);
+        for (i = e1.Iteration + 1; i < e2.Iteration; i++)
+        {
+            buff.AddTime(DateTime.MaxValue, i);
+        }
+        buff.AddTime(e2);
+        var aver = buff.CalculateMovingAverageTime();
+        var span = (d2 - d) / (length - 1);
+        Assert.AreEqual(span.Ticks, buff.CalculateMovingAverageTime().Ticks, 10);
+
     }
+
+    [DataTestMethod()]
+    [DataRow(2137, 1)]
+    [DataRow(10000, 10)]
+    [DataRow(10000, 100)]
+    [DataRow(10000, 1000)]
+    [DataRow(10000, 10000)]
+    public void TestRunningAverage(double millis, int increment)
+    {
+        var time = TimeSpan.FromMilliseconds(millis);
+        var start = DateTime.Now;
+        var end = start + time;
+        var avg = time / increment;
+        var buff = new TimeBuffer(0);
+        buff.AddTime(start, 0);
+        buff.AddTime(end, increment);
+        var aver = buff.CalculateMovingAverageTime();
+        Assert.AreEqual(avg, buff.CalculateMovingAverageTime());
+    }
+
     [DataTestMethod]
-    [DataRow(10,10)]
-    [DataRow(100,10)]
-    [DataRow(10,100)]
-    [DataRow(500,100)]
+    [DataRow(10, 10)]
+    [DataRow(100, 10)]
+    [DataRow(10, 100)]
+    [DataRow(500, 100)]
     public void TestValueReplacing(int inputLength, int calculationLength)
     {
         var buff = new TimeBuffer(calculationLength);
-        calculationLength = buff.MaxLength;
+        calculationLength = buff.BufferLength;
         DateTime date = DateTime.Now;
-        buff.AddTime(date);
         var range = Enumerable.Range(1, inputLength).ToArray();
         foreach (var item in range)
         {
             date += TimeSpan.FromTicks(item);
-            buff.AddTime(date);
+            buff.AddTime(date, item);
         }
         var cutOff = range
             .TakeLast(calculationLength)
-            .Select(x => TimeSpan.FromTicks(x))
             .ToArray();
-        bool seqEq = cutOff.SequenceEqual(buff.TimeSpans);
-        Assert.IsTrue(seqEq,"Timespans in buffer do not match expected values");
+        bool seqEq = cutOff.SequenceEqual(buff.TimeEntries.Select(x => x.Iteration));
+        Assert.IsTrue(seqEq, "Timespans in buffer do not match expected values");
     }
 }

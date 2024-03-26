@@ -99,7 +99,6 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
                 );
             ThrowTerminatingError(errorRecord);
         }
-
         ID += Offset;
         ParentID += Offset;
 
@@ -165,7 +164,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
 
     public object? GetDynamicParameters()
     {
-        if (IsThrottlingBuiltIn(CommandRuntime))
+        if (IsThrottlingBuiltIn(SessionState))
         {
             return null;
         }

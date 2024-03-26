@@ -32,7 +32,7 @@ public class TimeKeeper
 
 
     /// <inheritdoc cref="TimeBuffer.AddTime()"/>
-    public void AddTime() => Buffer.AddTime();
+    public void AddTime(int iteration) => Buffer.AddTime(iteration);
 
     /// <inheritdoc cref="TimeBuffer.CalculateMovingAverageTime()"/>
     public TimeSpan GetAverage() => Buffer.CalculateMovingAverageTime();

@@ -32,7 +32,7 @@ public class ProgressBaseCommand : PSCmdlet
                 // Do not write the comlete bar - due to pwsh7 throttling the complete update of bar
                 // will make the new bar not display
                 // From powershell point of view the bar never went away, just changed activity, etc...
-                RemoveProgressState(current.ID, false);
+                RemoveProgressState(current.ID, writeCompleted: false);
                 return AddNewProgressState(current);
             }
         }
