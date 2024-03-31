@@ -27,7 +27,7 @@ public class TimeBuffer
     /// Actual container for data.
     /// </summary>
     private readonly TimeEntry[] _timeEntries;
-    
+
     /// <summary>
     /// How many elements the buffer can store.
     /// </summary>
@@ -127,6 +127,9 @@ public class TimeBuffer
     /// <returns></returns>
     public TimeSpan CalculateMovingAverageTime()
     {
+#if NET6_0
+        return TimeSpan.MinValue;
+#endif
         var iterationSpan = LatestTimeEntry.Iteration - OldestTimeEntry.Iteration;
         if (iterationSpan <= 0)
         {

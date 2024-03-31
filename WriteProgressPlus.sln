@@ -3,9 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus", "WriteProgressPlus\WriteProgressPlus.csproj", "{18A2356B-1602-4A2C-9B4D-03D009F32026}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.Tests.7.4.1", "WriteProgressPlus.Tests\WriteProgressPlus.Tests.7.4.1.csproj", "{0FC21C76-4753-4632-9F65-C36AEBA41257}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WriteProgressPlus.Tests", "WriteProgressPlus.Tests\WriteProgressPlus.Tests.csproj", "{0FC21C76-4753-4632-9F65-C36AEBA41257}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-5.1.1", "WriteProgressPlus\WriteProgressPlus-5.1.1.csproj", "{408BE764-EDB2-48CF-906A-989A66928548}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-6.0.4", "WriteProgressPlus\WriteProgressPlus-6.0.4.csproj", "{FBD4AC9E-CE81-4CB0-8418-7B2F6939CD5E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-7.2.0", "WriteProgressPlus\WriteProgressPlus-7.2.0.csproj", "{1AD1C1F7-F17C-4FF3-87B5-673B85D8D30C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-7.4.1", "WriteProgressPlus\WriteProgressPlus-7.4.1.csproj", "{3C53F9E1-3628-45DE-B732-6FDF6746306D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +19,26 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{18A2356B-1602-4A2C-9B4D-03D009F32026}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{18A2356B-1602-4A2C-9B4D-03D009F32026}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{18A2356B-1602-4A2C-9B4D-03D009F32026}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{18A2356B-1602-4A2C-9B4D-03D009F32026}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0FC21C76-4753-4632-9F65-C36AEBA41257}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0FC21C76-4753-4632-9F65-C36AEBA41257}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0FC21C76-4753-4632-9F65-C36AEBA41257}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0FC21C76-4753-4632-9F65-C36AEBA41257}.Release|Any CPU.Build.0 = Release|Any CPU
+		{408BE764-EDB2-48CF-906A-989A66928548}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{408BE764-EDB2-48CF-906A-989A66928548}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{408BE764-EDB2-48CF-906A-989A66928548}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{408BE764-EDB2-48CF-906A-989A66928548}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBD4AC9E-CE81-4CB0-8418-7B2F6939CD5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBD4AC9E-CE81-4CB0-8418-7B2F6939CD5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBD4AC9E-CE81-4CB0-8418-7B2F6939CD5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBD4AC9E-CE81-4CB0-8418-7B2F6939CD5E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1AD1C1F7-F17C-4FF3-87B5-673B85D8D30C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1AD1C1F7-F17C-4FF3-87B5-673B85D8D30C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1AD1C1F7-F17C-4FF3-87B5-673B85D8D30C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1AD1C1F7-F17C-4FF3-87B5-673B85D8D30C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C53F9E1-3628-45DE-B732-6FDF6746306D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C53F9E1-3628-45DE-B732-6FDF6746306D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C53F9E1-3628-45DE-B732-6FDF6746306D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C53F9E1-3628-45DE-B732-6FDF6746306D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -29,15 +29,21 @@ internal static class PowershellVersionDifferences
     /// <returns>If host has built-in throttling - <see langword="true"/>. Otherwise - <see langword="false"/></returns>
     public static bool IsThrottlingBuiltIn(SessionState state)
     {
-        var versionTable = state.GetVariable<Hashtable>("PSVersionTable")!;
-        // Only checking if the version of PowerShell is after throttling was introduced.
-        // theoretically throttling is tied to ConsoleHost, and it is possible to implement it on its own (citation needed)
-        // but for now I am going to assume that checking the version is all that is needed
-        dynamic version = versionTable["PSVersion"];
-        // PSVersion can either be a Version or a SemanticVersion (introduced is PowerShell SDK 7)
-        // PowerShell 5 SDK does not have this, so we have to use dynamic objects
-        // We can get away with checking just the major version
-        return version.Major >= ThrottlingVersion.Major;
+#if POWERSHELL_604_OR_GREATER
+        return true;
+#else
+        return false;
+#endif
+        //var versionTable = state.GetVariable<Hashtable>("PSVersionTable")!;
+        //// Only checking if the version of PowerShell is after throttling was introduced.
+        //// theoretically throttling is tied to ConsoleHost, and it is possible to implement it on its own (citation needed)
+        //// but for now I am going to assume that checking the version is all that is needed
+        //dynamic version = versionTable["PSVersion"]!;
+        //// PSVersion can either be a Version or a SemanticVersion (introduced is PowerShell SDK 7)
+        //// PowerShell 5 SDK does not have this, so we have to use dynamic objects
+        //// We can get away with checking just the major version
+        //return version.Major >= ThrottlingVersion.Major;
+
     }
 
     /// <summary>
