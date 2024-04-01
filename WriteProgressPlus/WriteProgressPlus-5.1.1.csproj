@@ -2,7 +2,6 @@
 	<PropertyGroup>
 		<LangVersion>12.0</LangVersion>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<DefineConstants></DefineConstants>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -18,12 +17,27 @@
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>Progress, ProgressBar, Write-Progress</PackageTags>
 		<UserSecretsId>52c43017-536b-40f4-b31e-74a02a667f19</UserSecretsId>
+	</PropertyGroup>
+	<PropertyGroup>
 		<BaseIntermediateOutputPath>$(MSBuildProjectDir)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
 		<OutputPath>bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<!-- Exclude all contents of obj folder, otherwise it would try to build using different projects' files -->
+		<DefaultItemExcludes>$(DefaultItemExcludes);obj\**</DefaultItemExcludes>
 	</PropertyGroup>
-	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk"/>
+	
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
 	<ItemGroup>
+		<PackageReference Include="Meziantou.Analyzer" Version="2.0.141">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+		<PackageReference Include="PowerShellStandard.Library" Version="5.1.1" />
+	</ItemGroup>
+
+	<!-- <ItemGroup>
 		<None Update="test_files\interactive.ps1">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -33,21 +47,11 @@
 		<None Update="WriteProgressPlus.psd1">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-
-
-	<ItemGroup>
-		<PackageReference Include="Meziantou.Analyzer" Version="2.0.141">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.CSharp" Version="4.7.0"/>
-		<PackageReference Include="PowerShellStandard.Library" Version="5.1.1"/>
-	</ItemGroup>
-
+	</ItemGroup> -->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<!--<Exec Command="pwsh -executionpolicy bypass -noprofile -file &quot;$(ProjectDir)\build_scripts\postbuild.ps1&quot; -OutputDir $(TargetDir) -Name $(ProjectName) -Version $(Version) -ProjectDir $(ProjectDir)"/>-->
+		<!--<Exec
+		Command="pwsh -executionpolicy bypass -noprofile -file &quot;$(ProjectDir)\build_scripts\postbuild.ps1&quot; -OutputDir $(TargetDir) -Name $(ProjectName) -Version $(Version) -ProjectDir
+		$(ProjectDir)"/>-->
 	</Target>
-
-	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk"/>
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>

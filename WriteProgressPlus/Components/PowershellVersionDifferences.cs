@@ -4,14 +4,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management.Automation;
 using System.Text;
-using static System.FormattableString;
 
 namespace WriteProgressPlus.Components;
 internal static class PowershellVersionDifferences
 {
-    private static readonly Version ThrottlingVersion = new Version(6, 0, 0);
-    private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
-
     /// <summary>
     /// Since Powershell 6 ConsoleHost will automatically throttle updates to the progress bar.
     /// <para/>
@@ -20,7 +16,7 @@ internal static class PowershellVersionDifferences
     /// <para/>
     /// The PR was part of the <see href="https://github.com/PowerShell/PowerShell/releases/tag/v6.0.0-alpha.18">v6.0.0-alpha.18</see> release,
     /// so we can test if the host has throttling built-in by checking if the major version is greater than 6
-    /// (I assume, that no-one would be using pre-alpha18 Powershell 6 anymore).
+    /// The earlies available version on Nuget is 6.0.4.
     /// <para/>
     /// While it won't really be a problem, if the cmdlet does an additional throttling,
     /// for performance and simplicity reasons it's better to skip it, where applicable.
@@ -29,53 +25,33 @@ internal static class PowershellVersionDifferences
     /// <returns>If host has built-in throttling - <see langword="true"/>. Otherwise - <see langword="false"/></returns>
     public static bool IsThrottlingBuiltIn(SessionState state)
     {
-#if POWERSHELL_604_OR_GREATER
+#if POWERSHELL_BUILTIN_THROTTLING
         return true;
 #else
         return false;
 #endif
-        //var versionTable = state.GetVariable<Hashtable>("PSVersionTable")!;
-        //// Only checking if the version of PowerShell is after throttling was introduced.
-        //// theoretically throttling is tied to ConsoleHost, and it is possible to implement it on its own (citation needed)
-        //// but for now I am going to assume that checking the version is all that is needed
-        //dynamic version = versionTable["PSVersion"]!;
-        //// PSVersion can either be a Version or a SemanticVersion (introduced is PowerShell SDK 7)
-        //// PowerShell 5 SDK does not have this, so we have to use dynamic objects
-        //// We can get away with checking just the major version
-        //return version.Major >= ThrottlingVersion.Major;
-
     }
 
     /// <summary>
     /// Minimal view for progress bar was introduced in PowerShell 7.2.0, along with the PSStyle automatic variable (and its class)
-    /// Since this Powershell library does not have the definition of this class, we have to use dynamic objects.
     /// </summary>
     /// <param name="cmdlet"></param>
     /// <returns>Tuple of 2 values: whole line width and whether its minimal view</returns>
     public static (Size, bool isMinimal) GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
     {
-#if DEBUG
-        var dynamicStopwatch = Stopwatch.StartNew();
-#endif
         var buffer = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize;
         var lineWidth = buffer.Width;
-        var runtimeVersion = cmdlet.CommandRuntime.Host.Version;
-        if (runtimeVersion < MinimalProgressVersion)
-        {
-            return (buffer, false);
-        }
-        dynamic psstyle = cmdlet.SessionState.PSVariable.GetValue("PSStyle", defaultValue: null);
-        dynamic? progress = psstyle?.Progress;
-        bool isMinimalView = progress?.View.ToString() == "Minimal";
+        bool isMinimalView = false;
+#if POWERSHELL_HAS_MINIMAL_STYLE
+        PSStyle? psstyle = cmdlet.SessionState.PSVariable.GetValue("PSStyle", defaultValue: null) as PSStyle;
+        isMinimalView = psstyle?.Progress?.View == ProgressView.Minimal;
         if (isMinimalView)
         {
-            int styleMaxWidth = progress?.MaxWidth;
-            lineWidth = Math.Min(lineWidth, styleMaxWidth);
+            // psstyle is guaranteed not null here, since its view is minimal.
+            lineWidth = Math.Min(lineWidth, psstyle!.Progress.MaxWidth);
         }
-#if DEBUG
-        dynamicStopwatch.Stop();
-        Debug.WriteLine(message: Invariant($"{(double)dynamicStopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond} ms"));
 #endif
-        return (new Size(lineWidth, buffer.Height), isMinimalView);
+        var bufferSize = new Size(lineWidth, buffer.Height);
+        return (bufferSize, isMinimalView);
     }
 }

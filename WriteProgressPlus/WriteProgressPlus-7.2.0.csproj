@@ -1,8 +1,7 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project>
 	<PropertyGroup>
 		<LangVersion>12.0</LangVersion>
-		<TargetFramework>net7.0</TargetFramework>
-		<DefineConstants></DefineConstants>
+		<TargetFramework>net6.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
@@ -20,21 +19,21 @@
 		<UserSecretsId>52c43017-536b-40f4-b31e-74a02a667f19</UserSecretsId>
 	</PropertyGroup>
 	<PropertyGroup>
-		<DefineConstants>$(DefineConstants);POWERSHELL_604_OR_GREATER;POWERSHELL_720_OR_GREATER</DefineConstants>
+		<BaseIntermediateOutputPath>$(MSBuildProjectDir)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+		<OutputPath>bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<!-- Exclude all contents of obj folder, otherwise it would try to build using different projects' files -->
+		<DefaultItemExcludes>$(DefaultItemExcludes);obj\**</DefaultItemExcludes>
 	</PropertyGroup>
-	<ItemGroup>
-		<None Update="test_files\interactive.ps1">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="test_files\test.ps1">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="WriteProgressPlus.psd1">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
 
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
+	<PropertyGroup>
+		<!-- Automatic throttling was added in 6.0.0 - updates to the bar cannot happen to often, improving performance -->
+		<!-- Minimal progress bar style was introduced in 7.2.0 -->
+		<DefineConstants>$(DefineConstants);POWERSHELL_BUILTIN_THROTTLING;POWERSHELL_HAS_MINIMAL_STYLE</DefineConstants>
+	</PropertyGroup>
+	
 	<ItemGroup>
 		<PackageReference Include="Meziantou.Analyzer" Version="2.0.141">
 			<PrivateAssets>all</PrivateAssets>
@@ -44,9 +43,20 @@
 		<PackageReference Include="System.Management.Automation" Version="7.2.0" />
 		<PackageReference Include="Microsoft.PowerShell.SDK" Version="7.2.0" />
 	</ItemGroup>
-
+	
+	<!-- <ItemGroup>
+		<None Update="test_files\interactive.ps1">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="test_files\test.ps1">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="WriteProgressPlus.psd1">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup> -->
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="pwsh -executionpolicy bypass -noprofile -file &quot;$(ProjectDir)\build_scripts\postbuild.ps1&quot; -OutputDir $(TargetDir) -Name $(ProjectName) -Version $(Version) -ProjectDir $(ProjectDir)" />
+		<!-- <Exec Command="pwsh -executionpolicy bypass -noprofile -file &quot;$(ProjectDir)\build_scripts\postbuild.ps1&quot; -OutputDir $(TargetDir) -Name $(ProjectName) -Version $(Version) -ProjectDir $(ProjectDir)" /> -->
 	</Target>
-
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>
