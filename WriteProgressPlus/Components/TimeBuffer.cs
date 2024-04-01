@@ -127,9 +127,6 @@ public class TimeBuffer
     /// <returns></returns>
     public TimeSpan CalculateMovingAverageTime()
     {
-#if NET6_0
-        return TimeSpan.MinValue;
-#endif
         var iterationSpan = LatestTimeEntry.Iteration - OldestTimeEntry.Iteration;
         if (iterationSpan <= 0)
         {
