@@ -24,6 +24,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<!-- Exclude all contents of obj folder, otherwise it would try to build using different projects' files -->
 		<DefaultItemExcludes>$(DefaultItemExcludes);obj\**</DefaultItemExcludes>
+		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 	</PropertyGroup>
 
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
