@@ -1,4 +1,4 @@
-<Project >
+<Project>
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -28,7 +28,7 @@
     <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WriteProgressPlus\WriteProgressPlus.7.4.1.csproj" />
+    <ProjectReference Include="..\WriteProgressPlus\WriteProgressPlus.6.0.4.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,13 +5,19 @@ VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.Tests.7.4.1", "WriteProgressPlus.Tests\WriteProgressPlus.Tests.7.4.1.csproj", "{0FC21C76-4753-4632-9F65-C36AEBA41257}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-5.1.1", "WriteProgressPlus\WriteProgressPlus-5.1.1.csproj", "{408BE764-EDB2-48CF-906A-989A66928548}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.5.1.1", "WriteProgressPlus\WriteProgressPlus.5.1.1.csproj", "{408BE764-EDB2-48CF-906A-989A66928548}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-6.0.4", "WriteProgressPlus\WriteProgressPlus-6.0.4.csproj", "{FBD4AC9E-CE81-4CB0-8418-7B2F6939CD5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.6.0.4", "WriteProgressPlus\WriteProgressPlus.6.0.4.csproj", "{FBD4AC9E-CE81-4CB0-8418-7B2F6939CD5E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-7.2.0", "WriteProgressPlus\WriteProgressPlus-7.2.0.csproj", "{1AD1C1F7-F17C-4FF3-87B5-673B85D8D30C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.7.2.0", "WriteProgressPlus\WriteProgressPlus.7.2.0.csproj", "{1AD1C1F7-F17C-4FF3-87B5-673B85D8D30C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus-7.4.1", "WriteProgressPlus\WriteProgressPlus-7.4.1.csproj", "{3C53F9E1-3628-45DE-B732-6FDF6746306D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.7.4.1", "WriteProgressPlus\WriteProgressPlus.7.4.1.csproj", "{3C53F9E1-3628-45DE-B732-6FDF6746306D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.Tests.7.2.0", "WriteProgressPlus.Tests\WriteProgressPlus.Tests.7.2.0.csproj", "{1646C70B-0884-48D8-83D3-90E2FE8B32C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.Tests.6.0.4", "WriteProgressPlus.Tests\WriteProgressPlus.Tests.6.0.4.csproj", "{C67F605C-7CC9-4153-9A3A-1A7872341547}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WriteProgressPlus.Tests.5.1.1", "WriteProgressPlus.Tests\WriteProgressPlus.Tests.5.1.1.csproj", "{7E705104-E15F-4654-B286-8177C775CCC5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +45,18 @@ Global
 		{3C53F9E1-3628-45DE-B732-6FDF6746306D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3C53F9E1-3628-45DE-B732-6FDF6746306D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3C53F9E1-3628-45DE-B732-6FDF6746306D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1646C70B-0884-48D8-83D3-90E2FE8B32C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1646C70B-0884-48D8-83D3-90E2FE8B32C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1646C70B-0884-48D8-83D3-90E2FE8B32C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1646C70B-0884-48D8-83D3-90E2FE8B32C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C67F605C-7CC9-4153-9A3A-1A7872341547}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C67F605C-7CC9-4153-9A3A-1A7872341547}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C67F605C-7CC9-4153-9A3A-1A7872341547}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C67F605C-7CC9-4153-9A3A-1A7872341547}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7E705104-E15F-4654-B286-8177C775CCC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7E705104-E15F-4654-B286-8177C775CCC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7E705104-E15F-4654-B286-8177C775CCC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7E705104-E15F-4654-B286-8177C775CCC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
