@@ -13,7 +13,13 @@ internal static class PowershellVersionDifferences
     private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
     private static readonly Version MinimalThrottlingVersion = new Version(6, 0, 0);
 
+    /// <summary>
+    /// Whether the current Powershell host throttles call to Write-Progress. If not initialized returns false.
+    /// </summary>
     public static bool HasThrottlingBuiltIn { get; private set; }
+    /// <summary>
+    /// Whether the current Powershell supports multiple style for progress bar.
+    /// </summary>
     public static bool HasPSStyle { get; private set; }
     public static bool Initialized { get; private set; }
     static public void Initialize(Version powershellVersion)
@@ -46,6 +52,7 @@ internal static class PowershellVersionDifferences
         var dynamicStopwatch = Stopwatch.StartNew();
         if (!Initialized)
         {
+            // If for some reason, the class was not initialized during module import, ther first call to Write-Progress will initialize it
             var table = cmdlet.SessionState.GetVariable<Hashtable>("PSVersionTable")!;
             dynamic versionRaw = table["PSVersion"]!;
             if (versionRaw is Version version)

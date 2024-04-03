@@ -102,7 +102,7 @@ internal sealed class ProgressState
 
     public bool ShouldUpdate()
     {
-        if (IsThrottlingBuiltIn(SessionRuntime.SessionState))
+        if (HasThrottlingBuiltIn)
         {
             // The updates may be very frequent, but the built-in throttling will handle it.
             return true;
