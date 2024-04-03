@@ -8,7 +8,7 @@ using System.Text;
 using static System.FormattableString;
 
 namespace WriteProgressPlus.Components;
-internal static class PowershellVersionDifferences
+public static class PowershellVersionDifferences
 {
     private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
     private static readonly Version MinimalThrottlingVersion = new Version(6, 0, 0);
