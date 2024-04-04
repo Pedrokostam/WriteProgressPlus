@@ -160,9 +160,9 @@ public static class ViewFormatter
     /// <param name="input"></param>
     /// <param name="isViewMinimal"></param>
     /// <returns></returns>
-    internal static BarOutput FormatView(BarInput input, bool isViewMinimal)
+    internal static BarOutput FormatView(BarInput input)
     {
-        if (isViewMinimal)
+        if (input.Layout.IsMinimal)
         {
             // Minimal view overrides others.
             Debug.WriteLine("MINIMAL");

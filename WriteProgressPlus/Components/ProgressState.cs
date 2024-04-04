@@ -3,7 +3,7 @@ using System.Management.Automation;
 using System.Text;
 using System.Text.RegularExpressions;
 using static System.Globalization.CultureInfo;
-using static WriteProgressPlus.Components.PowershellVersionDifferences;
+using static WriteProgressPlus.Settings.PowershellVersionDifferences;
 
 namespace WriteProgressPlus.Components;
 
@@ -135,7 +135,7 @@ internal sealed class ProgressState
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
-        (Size buffer, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
+        ProgressLayout buffer = GetProgressViewTypeAndWidth(donor);
         Debug.WriteLine(buffer);
         StatusBuilder.Clear();
         StartNewIteration(donor);
@@ -144,7 +144,7 @@ internal sealed class ProgressState
         var formattedItem = GetFormattedItem(donor, counter.Percent);
         int remainingSeconds = GetRemainingSeconds(donor);
         var input = new BarInput(formattedItem, counter, donor.Activity, remainingSeconds, buffer, visibleElements);
-        BarOutput output = ViewFormatter.FormatView(input, isViewMinimal);
+        BarOutput output = ViewFormatter.FormatView(input);
         UpdateAssociatedRecord(output, donor.ParentID);
     }
 

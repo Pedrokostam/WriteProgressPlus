@@ -14,18 +14,18 @@ internal readonly record struct BarInput
     public readonly Counter Counter;
     public readonly string Activity;
     public readonly int RemainingTime;
-    public readonly Size BufferSize;
+    public readonly ProgressLayout Layout;
     public readonly Elements Visible;
-    public int LineWidth => BufferSize.Width;
-    public int LineHeight => BufferSize.Height;
+    public int LineWidth => Layout.Width;
+    public int LineHeight => Layout.Height;
 
-    public BarInput(string? formattedItem, Counter counter, string activity, int remainingTime, Size buffer, Elements visible)
+    public BarInput(string? formattedItem, Counter counter, string activity, int remainingTime, ProgressLayout buffer, Elements visible)
     {
         FormattedItem = Regex.Replace((formattedItem ?? string.Empty), @"[\r\n]", "", RegexOptions.None, TimeSpan.FromMilliseconds(500));
         Counter = counter;
         Activity = activity;
         RemainingTime = remainingTime;
-        BufferSize = buffer;
+        Layout = buffer;
         Visible = visible;
     }
 

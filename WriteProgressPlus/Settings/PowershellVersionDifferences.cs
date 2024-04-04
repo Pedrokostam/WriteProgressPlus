@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Management.Automation;
+using System.Management.Automation.Host;
 using System.Net.Http.Headers;
 using System.Text;
+using WriteProgressPlus.Components;
 using static System.FormattableString;
 
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Settings;
 public static class PowershellVersionDifferences
 {
     private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
@@ -46,7 +48,7 @@ public static class PowershellVersionDifferences
     /// </summary>
     /// <param name="cmdlet"></param>
     /// <returns>Tuple of 2 values: whole line width and whether its minimal view</returns>
-    public static (Size, bool isMinimal) GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
+    public static ProgressLayout GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
     {
 #if DEBUG
         var dynamicStopwatch = Stopwatch.StartNew();
@@ -65,7 +67,7 @@ public static class PowershellVersionDifferences
             }
         }
 #endif
-        Size buffer = (Size)cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize;
+        Size buffer = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize;
         var lineWidth = buffer.Width;
         bool isMinimalView = false;
         if (HasPSStyle)
@@ -84,6 +86,6 @@ public static class PowershellVersionDifferences
         dynamicStopwatch.Stop();
         Debug.WriteLine(message: Invariant($"{(double)dynamicStopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond} ms"));
 #endif
-        return (buffer, isMinimalView);
+        return new ProgressLayout(buffer, isMinimalView);
     }
 }

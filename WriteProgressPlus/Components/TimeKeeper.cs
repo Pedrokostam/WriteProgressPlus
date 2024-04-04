@@ -1,5 +1,7 @@
 ﻿
 
+using WriteProgressPlus.Settings;
+
 namespace WriteProgressPlus.Components;
 
 /// <summary>

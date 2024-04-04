@@ -1,7 +1,7 @@
 ﻿using System.Management.Automation;
 using System.Diagnostics;
 using WriteProgressPlus.Components;
-using static WriteProgressPlus.Components.PowershellVersionDifferences;
+using static WriteProgressPlus.Settings.PowershellVersionDifferences;
 
 namespace WriteProgressPlus;
 
