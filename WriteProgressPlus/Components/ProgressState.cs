@@ -2,8 +2,10 @@
 using System.Management.Automation;
 using System.Text;
 using System.Text.RegularExpressions;
+using WriteProgressPlus.Components.Layout;
+using WriteProgressPlus.Components.Time;
 using static System.Globalization.CultureInfo;
-using static WriteProgressPlus.Settings.PowershellVersionDifferences;
+using static WriteProgressPlus.Settings.PowerShellFeatures;
 
 namespace WriteProgressPlus.Components;
 
@@ -120,7 +122,7 @@ internal sealed class ProgressState
         }
         if (donor.NoCounter)
         {
-            elements &= ~(Elements.Counter);
+            elements &= ~Elements.Counter;
         }
         if (donor.NoPercentage)
         {
@@ -135,7 +137,7 @@ internal sealed class ProgressState
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
-        ProgressLayout buffer = GetProgressViewTypeAndWidth(donor);
+        ProgressAreaLayout buffer = ProgressAreaLayout.GetProgressLayout(donor);
         Debug.WriteLine(buffer);
         StatusBuilder.Clear();
         StartNewIteration(donor);
@@ -144,7 +146,7 @@ internal sealed class ProgressState
         var formattedItem = GetFormattedItem(donor, counter.Percent);
         int remainingSeconds = GetRemainingSeconds(donor);
         var input = new BarInput(formattedItem, counter, donor.Activity, remainingSeconds, buffer, visibleElements);
-        BarOutput output = ViewFormatter.FormatView(input);
+        BarOutput output = LayoutFormatter.FormatView(input);
         UpdateAssociatedRecord(output, donor.ParentID);
     }
 

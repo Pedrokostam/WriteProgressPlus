@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Components.Time;
 
 public static class TimeSpanExtensions
 {

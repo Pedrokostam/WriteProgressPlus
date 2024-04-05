@@ -4,12 +4,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Components.Layout;
 
 /// <summary>
 /// Contains method that prepare date for given progress bar view style.
 /// </summary>
-public static class ViewFormatter
+public static class LayoutFormatter
 {
     /// <summary>
     /// String used to denote the string has been truncated.

@@ -1,7 +1,9 @@
 ﻿using System.Management.Automation;
 using System.Diagnostics;
 using WriteProgressPlus.Components;
-using static WriteProgressPlus.Settings.PowershellVersionDifferences;
+using static WriteProgressPlus.Settings.PowerShellFeatures;
+using WriteProgressPlus.Parameters;
+using WriteProgressPlus.Exceptions;
 
 namespace WriteProgressPlus;
 

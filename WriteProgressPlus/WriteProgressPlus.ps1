@@ -1,1 +1,1 @@
-[WriteProgressPlus.Settings.PowershellVersionDifferences]::Initialize([Version]$PSVersionTable.PSVersion)
+[WriteProgressPlus.Settings.PowerShellFeatures]::Initialize([Version]$PSVersionTable.PSVersion)

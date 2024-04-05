@@ -20,26 +20,21 @@ public class ProgressBaseCommand : PSCmdlet
     /// <returns></returns>
     internal static ProgressState GetProgressState(WriteProgressPlusCommand current)
     {
-        if (ProgressDict.TryGetValue(current.ID, out ProgressState? existingProgressState))
-        {
-            if (current.KeepState.IsPresent || existingProgressState.HistoryId == current.HistoryId)
-            {
-                // If the history ids match, or if user requested state keeping, return the existing state
-                return existingProgressState;
-            }
-            else // HistoryId is different and user does not want to keep state
-            {
-                // Do not write the comlete bar - due to pwsh7 throttling the complete update of bar
-                // will make the new bar not display
-                // From powershell point of view the bar never went away, just changed activity, etc...
-                RemoveProgressState(current.ID, writeCompleted: false);
-                return AddNewProgressState(current);
-            }
-        }
-        else
+        if (!ProgressDict.TryGetValue(current.ID, out ProgressState? existingProgressState))
         {
             return AddNewProgressState(current);
         }
+        if (current.KeepState.IsPresent || existingProgressState.HistoryId == current.HistoryId)
+        {
+            // If the history ids match, or if user requested state keeping, return the existing state
+            return existingProgressState;
+        }
+        // HistoryId is different and user does not want to keep state
+        // Do not write the comlete bar - due to pwsh7 throttling the complete update of bar
+        // will make the new bar not display
+        // From powershell point of view the bar never went away, just changed activity, etc...
+        RemoveProgressState(current.ID, writeCompleted: false);
+        return AddNewProgressState(current);
     }
 
     private static ProgressState AddNewProgressState(WriteProgressPlusCommand current)

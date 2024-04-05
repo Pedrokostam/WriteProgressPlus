@@ -5,7 +5,7 @@ using static System.FormattableString;
 
 namespace WriteProgressPlus.Components;
 
-public partial class ItemFormatter
+public class ItemFormatter
 {
     public enum FormatSource
     {

@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
-namespace WriteProgressPlus.Components;
+
+namespace WriteProgressPlus.Components.Time;
 
 /// <summary>
 /// Simple implementation of a circular buffer.
@@ -27,7 +28,7 @@ public class TimeBuffer
     /// Actual container for data.
     /// </summary>
     private readonly TimeEntry[] _timeEntries;
-    
+
     /// <summary>
     /// How many elements the buffer can store.
     /// </summary>

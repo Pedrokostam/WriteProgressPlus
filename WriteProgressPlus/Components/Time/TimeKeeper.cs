@@ -1,8 +1,6 @@
-﻿
+﻿using WriteProgressPlus.Settings;
 
-using WriteProgressPlus.Settings;
-
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Components.Time;
 
 /// <summary>
 /// Controls how often a progress bar can update, keeps track of iteration times and calculates ETA.
@@ -16,7 +14,7 @@ public class TimeKeeper
     /// </summary>
     /// <remarks>
     /// More information can be found at
-    /// <seealso cref="PowershellVersionDifferences.IsThrottlingBuiltIn"/>.
+    /// <seealso cref="PowerShellFeatures.IsThrottlingBuiltIn"/>.
     /// </remarks>
     public static readonly long UpdatePeriodTicks = 2_000_000; // tick is 100ns => 200ms
 

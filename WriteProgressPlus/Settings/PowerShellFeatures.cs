@@ -6,11 +6,10 @@ using System.Management.Automation;
 using System.Management.Automation.Host;
 using System.Net.Http.Headers;
 using System.Text;
-using WriteProgressPlus.Components;
-using static System.FormattableString;
+using WriteProgressPlus.Extensions;
 
 namespace WriteProgressPlus.Settings;
-public static class PowershellVersionDifferences
+public static class PowerShellFeatures
 {
     private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
     private static readonly Version MinimalThrottlingVersion = new Version(6, 0, 0);
@@ -24,8 +23,9 @@ public static class PowershellVersionDifferences
     /// </summary>
     public static bool HasPSStyle { get; private set; }
     public static bool Initialized { get; private set; }
-    static public void Initialize(Version powershellVersion)
+    public static void Initialize(Version powershellVersion)
     {
+        if (Initialized) { return; }
         // Since Powershell 6 ConsoleHost will automatically throttle updates to the progress bar.
         // As per <see href="https://github.com/PowerShell/PowerShell/pull/2822">PR #2822</see>
         // the host will ignore updates until 200ms have passed since last update.
@@ -40,52 +40,19 @@ public static class PowershellVersionDifferences
         HasPSStyle = powershellVersion >= MinimalThrottlingVersion;
         Initialized = true;
     }
-
-
-    /// <summary>
-    /// Minimal view for progress bar was introduced in PowerShell 7.2.0, along with the PSStyle automatic variable (and its class)
-    /// Since this Powershell library does not have the definition of this class, we have to use dynamic objects.
-    /// </summary>
-    /// <param name="cmdlet"></param>
-    /// <returns>Tuple of 2 values: whole line width and whether its minimal view</returns>
-    public static ProgressLayout GetProgressViewTypeAndWidth(PSCmdlet cmdlet)
+    public static void Initialize(PSCmdlet cmdlet)
     {
-#if DEBUG
-        var dynamicStopwatch = Stopwatch.StartNew();
-        if (!Initialized)
+        if (Initialized) { return; }
+        // If for some reason, the class was not initialized during module import, ther first call to Write-Progress will initialize it
+        var table = cmdlet.SessionState.GetVariable<Hashtable>("PSVersionTable")!;
+        dynamic versionRaw = table["PSVersion"]!;
+        if (versionRaw is Version version)
         {
-            // If for some reason, the class was not initialized during module import, ther first call to Write-Progress will initialize it
-            var table = cmdlet.SessionState.GetVariable<Hashtable>("PSVersionTable")!;
-            dynamic versionRaw = table["PSVersion"]!;
-            if (versionRaw is Version version)
-            {
-                Initialize(version);
-            }
-            else
-            {
-                Initialize(new Version(versionRaw.Major, versionRaw.Minor));
-            }
+            Initialize(version);
         }
-#endif
-        Size buffer = cmdlet.CommandRuntime.Host.UI.RawUI.BufferSize;
-        var lineWidth = buffer.Width;
-        bool isMinimalView = false;
-        if (HasPSStyle)
+        else
         {
-            dynamic psstyle = cmdlet.SessionState.PSVariable.GetValue("PSStyle", defaultValue: null);
-            dynamic? progress = psstyle?.Progress;
-            isMinimalView = progress?.View.ToString() == "Minimal";
-            if (isMinimalView)
-            {
-                int styleMaxWidth = progress?.MaxWidth;
-                lineWidth = Math.Min(lineWidth, styleMaxWidth);
-            }
-            buffer = new Size(lineWidth, buffer.Height);
+            Initialize(new Version(versionRaw.Major, versionRaw.Minor));
         }
-#if DEBUG
-        dynamicStopwatch.Stop();
-        Debug.WriteLine(message: Invariant($"{(double)dynamicStopwatch.ElapsedTicks / TimeSpan.TicksPerMillisecond} ms"));
-#endif
-        return new ProgressLayout(buffer, isMinimalView);
     }
 }
