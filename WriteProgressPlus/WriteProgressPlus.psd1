@@ -51,7 +51,7 @@ Functionalities of this module include:
     #PowerShellHostName = 'ConsoleHost' # no need to limit, while it may work.
 
     # Minimum version of the PowerShell host required by this module
-    PowerShellHostVersion = '4.0'
+    #PowerShellHostVersion = '4.0'
 
     # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
     DotNetFrameworkVersion = '4.6.1'
