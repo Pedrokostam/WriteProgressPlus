@@ -11,7 +11,7 @@ public class ProgressBaseCommand : PSCmdlet
     internal static readonly Dictionary<int, ProgressState> ProgressDict = [];
 
     /// <summary>
-    /// Looks for the state associated with the given instance (by its ID).
+    /// Looks for the state associated with the given instance (by its Id).
     /// If no matching state is found, creates a new one and returns it.
     /// <para/>
     /// If the state comes from different historyID, it may be removed and created anew (depending on settings of <paramref name="current"/>)
@@ -20,7 +20,7 @@ public class ProgressBaseCommand : PSCmdlet
     /// <returns></returns>
     internal static ProgressState GetProgressState(WriteProgressPlusCommand current)
     {
-        if (!ProgressDict.TryGetValue(current.ID, out ProgressState? existingProgressState))
+        if (!ProgressDict.TryGetValue(current.Id, out ProgressState? existingProgressState))
         {
             return AddNewProgressState(current);
         }
@@ -33,14 +33,14 @@ public class ProgressBaseCommand : PSCmdlet
         // Do not write the comlete bar - due to pwsh7 throttling the complete update of bar
         // will make the new bar not display
         // From powershell point of view the bar never went away, just changed activity, etc...
-        RemoveProgressState(current.ID, writeCompleted: false);
+        RemoveProgressState(current.Id, writeCompleted: false);
         return AddNewProgressState(current);
     }
 
     private static ProgressState AddNewProgressState(WriteProgressPlusCommand current)
     {
         ProgressState p = new(current);
-        ProgressDict.Add(current.ID, p);
+        ProgressDict.Add(current.Id, p);
         return p;
     }
 
@@ -57,7 +57,7 @@ public class ProgressBaseCommand : PSCmdlet
     /// <para/>
     /// If state is removed and <paramref name="writeCompleted"/> is <see langword="true"/>, its bar will be updated once with RecordType set to complete to clear it.
     /// </summary>
-    /// <param name="id">ID of ProgressState</param>
+    /// <param name="id">Id of ProgressState</param>
     /// <returns></returns>
     private static bool RemoveProgressState(int id, bool writeCompleted)
     {

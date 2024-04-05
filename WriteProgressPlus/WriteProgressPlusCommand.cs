@@ -14,10 +14,10 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
 {
     [Parameter]
     [ValidateRange(0, int.MaxValue)]
-    public int ID { get; set; } = 1;
+    public int Id { get; set; } = 1;
 
     [Parameter]
-    public int ParentID { get; set; } = -1;
+    public int ParentId { get; set; } = -1;
 
     [Parameter]
     [ValidateNotNull]
@@ -91,7 +91,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
 
     protected override void BeginProcessing()
     {
-        if (ID == ParentID)
+        if (Id == ParentId)
         {
             var errorRecord = new ErrorRecord(
                 new IdConflictException(),
@@ -101,8 +101,8 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
                 );
             ThrowTerminatingError(errorRecord);
         }
-        ID += Offset;
-        ParentID += Offset;
+        Id += Offset;
+        ParentId += Offset;
 
         int pipePosition = MyInvocation.PipelinePosition;
         int pipeLength = MyInvocation.PipelineLength;
@@ -158,7 +158,7 @@ public sealed class WriteProgressPlusCommand : ProgressBaseCommand, IDynamicPara
         // In pipeline mode, we want to complete the bar and remove it at the end
         if (PipelineMode)
         {
-            RemoveProgressState(ID);
+            RemoveProgressState(Id);
         }
     }
 

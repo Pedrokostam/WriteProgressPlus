@@ -17,14 +17,14 @@ internal sealed class ProgressState
 
     public ProgressState(WriteProgressPlusCommand donor)
     {
-        Id = donor.ID;
-        ParentId = donor.ParentID < ProgressBaseCommand.Offset ? -1 : donor.ParentID;
+        Id = donor.Id;
+        ParentId = donor.ParentId < ProgressBaseCommand.Offset ? -1 : donor.ParentId;
 
         // Let the calculation length about 1/20 of the total length, still subject to minimum, maximum and calculation lengths in  Buffer
         int timeCalculationLength = donor.TotalCount / 20;
         Keeper = new TimeKeeper(timeCalculationLength);
 
-        AssociatedRecord = new ProgressRecord(donor.ID, Placeholder, Placeholder);
+        AssociatedRecord = new ProgressRecord(donor.Id, Placeholder, Placeholder);
 
         // try to reuse parentRuntime
         SessionRuntime? parentSessionRuntime = ParentId > 0 ? ProgressBaseCommand.ProgressDict[ParentId].SessionRuntime : null;
@@ -147,7 +147,7 @@ internal sealed class ProgressState
         int remainingSeconds = GetRemainingSeconds(donor);
         var input = new BarInput(formattedItem, counter, donor.Activity, remainingSeconds, buffer, visibleElements);
         BarOutput output = LayoutFormatter.FormatView(input);
-        UpdateAssociatedRecord(output, donor.ParentID);
+        UpdateAssociatedRecord(output, donor.ParentId);
     }
 
     private void UpdateAssociatedRecord(BarOutput output, int parentID)
