@@ -22,7 +22,7 @@ public class FormatterTests
         formatter.Update(script, properties, separator);
         return formatter;
     }
-    public static readonly DateTime TestDate = new DateTime(year: 2005,
+    public static readonly DateTime TestDate = new(year: 2005,
                                                      month: 4,
                                                      day: 2,
                                                      hour: 21,

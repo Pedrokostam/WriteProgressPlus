@@ -11,8 +11,8 @@ using WriteProgressPlus.Extensions;
 namespace WriteProgressPlus.Settings;
 public static class PowerShellFeatures
 {
-    private static readonly Version MinimalProgressVersion = new Version(7, 2, 0);
-    private static readonly Version MinimalThrottlingVersion = new Version(6, 0, 0);
+    private static readonly Version MinimalProgressVersion = new(major: 7, minor: 2, build: 0);
+    private static readonly Version MinimalThrottlingVersion = new(major: 6, minor: 0, build: 0);
 
     /// <summary>
     /// Whether the current Powershell host throttles call to Write-Progress. If not initialized returns false.
