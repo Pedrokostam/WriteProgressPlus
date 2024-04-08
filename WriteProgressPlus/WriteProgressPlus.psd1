@@ -12,10 +12,10 @@
     #RootModule = 'WriteProgressPlus.dll'
 
     # Version number of this module.
-    ModuleVersion      = '0.0.1'
+    ModuleVersion      = '0.0.1' # placeholder 
 
     # Supported PSEditions
-    # CompatiblePSEditions = @('Desktop', 'Core')
+    CompatiblePSEditions = @()
 
     # ID used to uniquely identify this module
     GUID               = '19da6c54-8e49-4a5f-b424-4ba6e3500783'
@@ -24,7 +24,7 @@
     Author             = 'Maciej Krosta'
 
     # Company or vendor of this module
-    CompanyName        = 'Unknown'
+    CompanyName        = ''
 
     # Copyright statement for this module
     Copyright          = '(c) Maciej Krosta. All rights reserved.'
@@ -48,58 +48,58 @@ Functionalities of this module include:
     PowerShellVersion  = '3.0'
 
     # Name of the PowerShell host required by this module
-    #PowerShellHostName = 'ConsoleHost' # no need to limit, while it may work.
+    PowerShellHostName = ''
 
     # Minimum version of the PowerShell host required by this module
-    #PowerShellHostVersion = '4.0'
+    PowerShellHostVersion = ''
 
     # Minimum version of Microsoft .NET Framework required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-    DotNetFrameworkVersion = '4.6.1'
+    DotNetFrameworkVersion = '4.6.1' # lowest version compliant with netstandard2.0
 
     # Minimum version of the common language runtime (CLR) required by this module. This prerequisite is valid for the PowerShell Desktop edition only.
-    # ClrVersion = ''
+    ClrVersion = ''
 
     # Processor architecture (None, X86, Amd64) required by this module
-    # ProcessorArchitecture = ''
+    ProcessorArchitecture = 'None'
 
     # Modules that must be imported into the global environment prior to importing this module
-    # RequiredModules = @()
+    RequiredModules = @()
 
     # Assemblies that must be loaded prior to importing this module
-    # RequiredAssemblies = @()
+    RequiredAssemblies = @()
 
     # Script files (.ps1) that are run in the caller's environment prior to importing this module.
-    # ScriptsToProcess = @()
+    ScriptsToProcess = @() # placeholder 
 
     # Type files (.ps1xml) to be loaded when importing this module
-    # TypesToProcess = @()
+    TypesToProcess = @()
 
     # Format files (.ps1xml) to be loaded when importing this module
-    # FormatsToProcess = @()
+    FormatsToProcess = @()
 
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    #NestedModules      = @()
+    NestedModules = @()
 
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    #FunctionsToExport  = @()
+    FunctionsToExport  = @()
 
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
-    #CmdletsToExport    = @('Write-ProgressPlus', 'Reset-ProgressPlus')
+    CmdletsToExport    = @() # placeholder 
 
     # Variables to export from this module
-    #VariablesToExport  = @()
+    VariablesToExport = @() 
 
     # Aliases to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no aliases to export.
-    #AliasesToExport    = @('WriPro', 'ResPro')
+    AliasesToExport    = @() # placeholder 
 
     # DSC resources to export from this module
-    # DscResourcesToExport = @()
+    DscResourcesToExport = @()
 
     # List of all modules packaged with this module
-    # ModuleList = @()
+    ModuleList = @()
 
     # List of all files packaged with this module
-    # FileList = @()
+    FileList = @() # placeholder 
 
     # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData        = @{
@@ -122,7 +122,7 @@ Functionalities of this module include:
             ReleaseNotes = 'https://github.com/Pedrokostam/WriteProgressPlus/blob/master/CHANGELOG.md'
 
             # Prerelease string of this module
-            # Prerelease = ''
+            # Prerelease = 'false'
 
             # Flag to indicate whether the module requires explicit user acceptance for install/update/save
             # RequireLicenseAcceptance = $false
@@ -138,7 +138,7 @@ Functionalities of this module include:
     # HelpInfoURI = ''
 
     # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
-    # DefaultCommandPrefix = ''
+    DefaultCommandPrefix = ''
 
 }
 
