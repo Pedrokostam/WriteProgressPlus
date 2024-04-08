@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Components.Layout;
 /// <summary>
 /// Contains data for:
 /// <list type="bullet">
@@ -25,24 +25,24 @@ public readonly record struct Counter
 
     public Counter()
     {
-        this.Iteration = -1;
-        this.Total = -1;
+        Iteration = -1;
+        Total = -1;
     }
 
     public Counter(int iteration, int total)
     {
-        this.Iteration = iteration;
-        this.Total = total;
+        Iteration = iteration;
+        Total = total;
     }
 
     /// <summary>
     /// Checks whether Total is positive
     /// </summary>
-    public bool IsTotalProvided => this.Total > 0;
+    public bool IsTotalProvided => Total > 0;
     /// <summary>
     /// Checks whether Current iteration is positive or zero
     /// </summary>
-    public bool IsIterationProvided => this.Iteration >= 0;
+    public bool IsIterationProvided => Iteration >= 0;
 
     /// <summary>
     /// Return the calculated percentage, or -1, if either total or current are not provided.
@@ -51,15 +51,15 @@ public readonly record struct Counter
     {
         get
         {
-            if (IsTotalProvided && IsIterationProvided && this.Iteration <= this.Total)
+            if (IsTotalProvided && IsIterationProvided && Iteration <= Total)
             {
-                return this.Iteration * 100 / this.Total;
+                return Iteration * 100 / Total;
             }
-            return Counter.BarDisabled;
+            return BarDisabled;
         }
     }
 
-    public bool KnownTotal => this.Total > 0;
+    public bool KnownTotal => Total > 0;
 
     /// <summary>
     /// Create the text form of counter with percents: {current}/{total} ({percent})
@@ -89,11 +89,11 @@ public readonly record struct Counter
     public string GetTextForm(Elements elements, int maxLength)
     {
         // [counter_part] ([percent_part])
-        string counterPart = this.GetCounterString(elements, maxLength);
+        string counterPart = GetCounterString(elements, maxLength);
         // if we have a counter part, percents will be in parentheses, after a space
         // otherwise, there will be only percents or nothing
         int percentLengthReserved = counterPart == "" ? counterPart.Length + 3 : 0;
-        string percentPart = this.GetPercentString(elements, maxLength - percentLengthReserved);
+        string percentPart = GetPercentString(elements, maxLength - percentLengthReserved);
 
         string result = (counterPart, percentPart) switch
         {
@@ -129,8 +129,8 @@ public readonly record struct Counter
     /// <returns>Concatenation of current and total with separator, one of the elements, or an empty string </returns>
     public string GetCounterString(Elements elements, int maxLength)
     {
-        bool iterationPresent = elements.HasFlag(Elements.Iteration) && this.IsIterationProvided;
-        bool totalPresent = elements.HasFlag(Elements.TotalCount) && this.IsTotalProvided;
+        bool iterationPresent = elements.HasFlag(Elements.Iteration) && IsIterationProvided;
+        bool totalPresent = elements.HasFlag(Elements.TotalCount) && IsTotalProvided;
         if (!iterationPresent && !totalPresent || maxLength == 0)
         {
             // Neither part of counter is requested (or we don;t have any space)
@@ -140,11 +140,11 @@ public readonly record struct Counter
         string iteration = string.Empty;
         if (totalPresent)
         {
-            total = this.Total.ToString(CultureInfo.InvariantCulture);
+            total = Total.ToString(CultureInfo.InvariantCulture);
         }
         if (iterationPresent)
         {
-            iteration = this.Iteration.ToString(CultureInfo.InvariantCulture);
+            iteration = Iteration.ToString(CultureInfo.InvariantCulture);
         }
 
         if (!totalPresent && iterationPresent)
@@ -158,7 +158,7 @@ public readonly record struct Counter
 
         int partLength = Math.Max(total.Length, iteration.Length);
         // possible length includes iteration part padded to at least the width of total count.
-        int possibleLength = partLength * 2 + Counter.Separator.Length;
+        int possibleLength = partLength * 2 + Separator.Length;
 
         if (possibleLength > maxLength)
         {
@@ -218,11 +218,11 @@ public readonly record struct Counter
     /// <returns></returns>
     private string GetPercentStringImpl(Elements elements, int maxLength, string format)
     {
-        if (this.Percent < 0 || !elements.HasFlag(Elements.Percentage))
+        if (Percent < 0 || !elements.HasFlag(Elements.Percentage))
         {
             return string.Empty;
         }
-        string p = this.Percent.ToString(format, CultureInfo.InvariantCulture);
+        string p = Percent.ToString(format, CultureInfo.InvariantCulture);
         if (p.Length > maxLength)
         {
             // can't really trim it

@@ -5,7 +5,7 @@ using static System.FormattableString;
 
 namespace WriteProgressPlus.Components;
 
-public partial class ItemFormatter
+public class ItemFormatter
 {
     public enum FormatSource
     {
@@ -73,14 +73,11 @@ public partial class ItemFormatter
         }
 
         object? firstObject = objects[0];
-        if (Properties.Length > 0)
-        {
-            return GetFormattedProperties(firstObject);
-        }
-        else
+        if (Properties.Length == 0)
         {
             return firstObject?.ToString();
         }
+        return GetFormattedProperties(firstObject);
     }
 
     /// <summary>

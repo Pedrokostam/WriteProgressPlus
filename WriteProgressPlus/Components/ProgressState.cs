@@ -2,8 +2,10 @@
 using System.Management.Automation;
 using System.Text;
 using System.Text.RegularExpressions;
+using WriteProgressPlus.Components.Layout;
+using WriteProgressPlus.Components.Time;
 using static System.Globalization.CultureInfo;
-using static WriteProgressPlus.Components.PowershellVersionDifferences;
+using static WriteProgressPlus.Settings.PowerShellFeatures;
 
 namespace WriteProgressPlus.Components;
 
@@ -15,14 +17,14 @@ internal sealed class ProgressState
 
     public ProgressState(WriteProgressPlusCommand donor)
     {
-        Id = donor.ID;
-        ParentId = donor.ParentID < ProgressBaseCommand.Offset ? -1 : donor.ParentID;
+        Id = donor.Id;
+        ParentId = donor.ParentId < ProgressBaseCommand.Offset ? -1 : donor.ParentId;
 
         // Let the calculation length about 1/20 of the total length, still subject to minimum, maximum and calculation lengths in  Buffer
         int timeCalculationLength = donor.TotalCount / 20;
         Keeper = new TimeKeeper(timeCalculationLength);
 
-        AssociatedRecord = new ProgressRecord(donor.ID, Placeholder, Placeholder);
+        AssociatedRecord = new ProgressRecord(donor.Id, Placeholder, Placeholder);
 
         // try to reuse parentRuntime
         SessionRuntime? parentSessionRuntime = ParentId > 0 ? ProgressBaseCommand.ProgressDict[ParentId].SessionRuntime : null;
@@ -102,7 +104,7 @@ internal sealed class ProgressState
 
     public bool ShouldUpdate()
     {
-        if (IsThrottlingBuiltIn(SessionRuntime.SessionState))
+        if (HasThrottlingBuiltIn)
         {
             // The updates may be very frequent, but the built-in throttling will handle it.
             return true;
@@ -120,7 +122,7 @@ internal sealed class ProgressState
         }
         if (donor.NoCounter)
         {
-            elements &= ~(Elements.Counter);
+            elements &= ~Elements.Counter;
         }
         if (donor.NoPercentage)
         {
@@ -135,7 +137,7 @@ internal sealed class ProgressState
 
     internal void UpdateRecord(WriteProgressPlusCommand donor)
     {
-        (Size buffer, bool isViewMinimal) = GetProgressViewTypeAndWidth(donor);
+        ProgressAreaLayout buffer = ProgressAreaLayout.GetProgressLayout(donor);
         Debug.WriteLine(buffer);
         StatusBuilder.Clear();
         StartNewIteration(donor);
@@ -144,8 +146,8 @@ internal sealed class ProgressState
         var formattedItem = GetFormattedItem(donor, counter.Percent);
         int remainingSeconds = GetRemainingSeconds(donor);
         var input = new BarInput(formattedItem, counter, donor.Activity, remainingSeconds, buffer, visibleElements);
-        BarOutput output = ViewFormatter.FormatView(input, isViewMinimal);
-        UpdateAssociatedRecord(output, donor.ParentID);
+        BarOutput output = LayoutFormatter.FormatView(input);
+        UpdateAssociatedRecord(output, donor.ParentId);
     }
 
     private void UpdateAssociatedRecord(BarOutput output, int parentID)

@@ -1,4 +1,4 @@
-﻿namespace WriteProgressPlus.Components;
+﻿namespace WriteProgressPlus.Components.Layout;
 
 internal readonly record struct BarOutput
 {

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Management.Automation;
 
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Parameters;
 
 internal class CollectionToLengthTransformationAttribute : ArgumentTransformationAttribute
 {

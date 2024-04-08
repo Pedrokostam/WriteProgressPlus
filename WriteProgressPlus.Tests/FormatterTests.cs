@@ -16,13 +16,13 @@ public class FormatterTests
 {
     static PowerShell Pwsh { get; }
 
-    public ItemFormatter GetFormatter(ScriptBlock? script = null, string[]? properties = null, string? separator = null)
+    public static ItemFormatter GetFormatter(ScriptBlock? script = null, string[]? properties = null, string? separator = null)
     {
         var formatter = new ItemFormatter();
         formatter.Update(script, properties, separator);
         return formatter;
     }
-    public static readonly DateTime TestDate = new DateTime(year: 2005,
+    public static readonly DateTime TestDate = new(year: 2005,
                                                      month: 4,
                                                      day: 2,
                                                      hour: 21,
@@ -55,6 +55,7 @@ public class FormatterTests
     public static readonly string[] Standard_PropertyPattern = ["hour", "minute"];
     public static readonly object[] Standard_PropertyTargets = [21, 37];
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Required for dynamic data")]
     public static string DefaultFormatterTestValuesDisplayName(MethodInfo methodInfo, object[] data)
     {
         var first = data[0];
@@ -75,6 +76,7 @@ public class FormatterTests
         [Guid.NewGuid()],
         [null],
     ];
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Required for dynamic data")]
     public static string CaseSensitiveTestValuesDisplayName(MethodInfo methodInfo, object[] data)
     {
         var obj = data[0];
@@ -105,6 +107,7 @@ public class FormatterTests
         }
     }
 
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Required for dynamic data")]
     public static string PropertyOrderTestValuesDisplayName(MethodInfo methodInfo, object[] data)
     {
         var obj = data[0];

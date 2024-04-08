@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Components.Layout;
 
 /// <summary>
 /// Parts that can be displayed in a progress bar.0

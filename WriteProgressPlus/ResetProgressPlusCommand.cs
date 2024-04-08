@@ -11,7 +11,7 @@ namespace WriteProgressPlus;
 public sealed class ResetProgressPlusCommand : ProgressBaseCommand
 {
     [Parameter(Position = 0, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, ParameterSetName = "NORMAL")]
-    public int[]? ID { get; set; }
+    public int[]? Id { get; set; }
 
     [Parameter(ParameterSetName = "ALL")]
     public SwitchParameter All { get; set; }
@@ -28,9 +28,9 @@ public sealed class ResetProgressPlusCommand : ProgressBaseCommand
 
     protected override void ProcessRecord()
     {
-        if (ID != null)
+        if (Id != null)
         {
-            foreach (int i in ID)
+            foreach (int i in Id)
             {
                 if (RemoveProgressState(i + Offset))
                     WriteVerbose(Invariant($"Removed progress bar - {i}"));
@@ -39,7 +39,7 @@ public sealed class ResetProgressPlusCommand : ProgressBaseCommand
         else if (!All.IsPresent)
         {
             ErrorRecord ec = new(
-                new InvalidOperationException("Neither -All nor any ID were specified."),
+                new InvalidOperationException("Neither -All nor any Id were specified."),
                 "Parameter error",
                 ErrorCategory.InvalidArgument,
                 this);

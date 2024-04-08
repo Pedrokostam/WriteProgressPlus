@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web.Services.Description;
 using WriteProgressPlus.Components;
+using WriteProgressPlus.Components.Time;
 
 namespace WriteProgressPlus.Tests;
 
@@ -48,9 +49,9 @@ public class TimeBufferTests
             buff.AddTime(DateTime.MaxValue, i);
         }
         buff.AddTime(e2);
-        var aver = buff.CalculateMovingAverageTime();
+        var average = buff.CalculateMovingAverageTime();
         var span = (d2 - d) / (length - 1);
-        Assert.AreEqual(span.Ticks, buff.CalculateMovingAverageTime().Ticks, 10);
+        Assert.AreEqual(span.Ticks, average.Ticks, 10);
 
     }
 
@@ -69,8 +70,8 @@ public class TimeBufferTests
         var buff = new TimeBuffer(0);
         buff.AddTime(start, 0);
         buff.AddTime(end, increment);
-        var aver = buff.CalculateMovingAverageTime();
-        Assert.AreEqual(avg, buff.CalculateMovingAverageTime());
+        var average = buff.CalculateMovingAverageTime();
+        Assert.AreEqual(avg, average);
     }
 
     [DataTestMethod]

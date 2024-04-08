@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Runtime.InteropServices;
-namespace WriteProgressPlus.Components;
+namespace WriteProgressPlus.Components.Time;
 
 /// <summary>
 /// Container class for coupling datetime and iteration.
