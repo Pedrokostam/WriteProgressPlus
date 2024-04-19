@@ -9,7 +9,7 @@
 		<OutputType>Library</OutputType>
 		<Authors>Maciej Krosta</Authors>
 		<Version>1.2.1</Version>
-		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>WriteProgressPlus</Title>
 		<Description>Module that simplifies using the Write-Progress cmdlet in PowerShell: automates time and percentage calculations; enables pipeline support.</Description>
 		<Copyright>Maciej Krosta</Copyright>
